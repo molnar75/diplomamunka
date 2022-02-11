@@ -1,4 +1,4 @@
-Szürkeárnyalatos képek automatikus színezése gépi tanulási módszerekkel
+# Szürkeárnyalatos képek automatikus színezése gépi tanulási módszerekkel
 
 Számos példát láthatunk arra, hogy régi fényképeket, fekete-fehér
 filmeket restaurálnak, majd egy további lépésben ki is színeznek. A
