@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: commonmethods
+Version: 1.0.0
+Summary: Python package for my diploma thesis
+Home-page: UNKNOWN
+Author: Fanni Molnár
+Author-email: <fannimolnr98@gmail.com>
+License: UNKNOWN
+Description: Python package for my diploma thesis that contains some common methods that I use in different python notebooks
+Platform: UNKNOWN
