@@ -1,0 +1,90 @@
+\Chapter{Általános információk (?)}
+
+Ebben a fejezetben néhány általános információ található, amik a dolgozat teljes egészére érvényesek.
+
+\Section{Felhasznált képek}
+
+A teszteléshez csendéletekről készült képeket gyűjtöttem az unsplash nevezetű weboldalról. \cite{unsplash}
+A csendéleteken a tárgyak intenzitása jól elkülönül a háttér intenzitásától így egyszerűbben lehet rajta szegmentálást végrehajtani.
+A képek nevei a 0 és 5 közötti számok, pl. 0.jpg.
+
+\Section{Képek feldolgozása}
+
+A képek feldolgozása során előfordulnak olyan lépések, műveletek amelyeket több ponton is megismételtem. Ezeket ebben a bekezdésben szeretném bemutatni, a későbbiekben nem térek ki rájuk részletesen. 
+A képfeldolgozáshoz az opencv-python könyvtárat használtam.
+
+\SubSection{Betöltés}
+
+A képeket két módon töltöm be a további feldolgozásra:
+\begin{itemize}
+\item színesen
+\item szürkeárnyalatosan
+\end{itemize}
+Ehhez két külön metódust készítettem:
+\begin{itemize}
+\item \texttt{load\_image\_rgb}
+\item \texttt{load\_image\_grayscale}
+\end{itemize}
+Ezek eleinte minden notebookban ismétlődtek, majd a kutatás későbbi szakaszában kiszerveztem őket a \texttt{commonmethods} nevű saját készítésű python librarybe amiről részletesebben a következő alfejezetben írok.
+
+A szürkeárnyalatos kép betöltését a következő kódrészlet tartalmazza.
+\begin{python}
+import cv2
+
+def load_image_grayscale(name):
+    """
+    Loading the image from the images folder using opencv-python
+    :param name: the name of the image I want to load,
+        the method doesn't need the path or the extension
+    :return: the loaded image in grayscale color
+    """
+    image = cv2.imread('../images/' + format(name) + '.jpg')
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    return image
+\end{python}
+A színes kép betöltése annyiban különbözik, hogy a cv2.COLOR\_BGR2GRAY helyett cv2.COLOR\_BGR2RGB szerepel.
+
+Mind a két metódus a kép nevét várja bemenetként. Mivel a tesztelés során használt képek mindegyike JPG típusú így a kiterjesztést a metódus automatikusan hozzákapcsolja.
+
+\SubSection{Átméretezés}
+
+Átméretezésre a \texttt{resize\_image} metódust készítettem, amelynek a forráskódja a következő:
+\begin{python}
+import cv2
+
+def resize_image(image, wanted_height) :
+    """
+    Resizing the image for the given height,
+    without disortion, using opencv-python
+    :param image: the image that I want to resize
+    :param wanted_height: the height in pixel that
+        I want to have in the resized image
+    :return: the resized image
+    """
+    height = image.shape[0]
+    # calculating the amount with I need to change the width
+    scale_percent = height / wanted_height
+    width = int(image.shape[0] / scale_percent)
+    dim = (width, wanted_height)
+
+    resized_image = \
+        cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+
+    return resized_image
+\end{python}
+Bemenetként magát a képet várja és azt a méretet px-ben, amire a magasságot szeretnénk változtatni. Hogy ne torzuljon a kép, kiszámítok egy arányt a paraméterként kapott méretből és a kép magasságából, majd ezzel az aránnyal csökkentem a kép szélességét.
+
+\Section{Közös metódusok kiszervezése}
+
+Írni a saját Python libraryről, hogyan kell használni stb. \cite{pythonlibrary}
+
+\Section{Tesztelési környezet}
+
+A programkódok tesztelését minden esetben az otthoni számítógépemen végeztem aminek a paraméterei a következők:
+\begin{itemize}
+\item Processzor: Intel(R) Core(TM) i5-9400F CPU 2.90GHz
+\item Memória mérete: 16 GB
+\item (?) Videókártya: NVIDIA GeForce GTX 1660
+\item Operációs rendszer: Windows 10 Enterprise
+\end{itemize} 
