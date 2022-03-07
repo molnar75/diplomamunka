@@ -10,7 +10,7 @@ A képek nevei a 0 és 5 közötti számok, pl. 0.jpg.
 
 \Section{Képek feldolgozása}
 
-A képek feldolgozása során előfordulnak olyan lépések, műveletek amelyeket több ponton is megismételtem. Ezeket ebben a bekezdésben szeretném bemutatni, a későbbiekben nem térek ki rájuk részletesen. 
+A képek feldolgozása során előfordulnak olyan lépések, műveletek amelyeket több ponton is megismételtem. Ezeket ebben a bekezdésben szeretném bemutatni, a későbbiekben nem térek ki rájuk részletesen.
 A képfeldolgozáshoz az opencv-python könyvtárat használtam.
 
 \SubSection{Betöltés}
@@ -75,9 +75,93 @@ def resize_image(image, wanted_height) :
 \end{python}
 Bemenetként magát a képet várja és azt a méretet px-ben, amire a magasságot szeretnénk változtatni. Hogy ne torzuljon a kép, kiszámítok egy arányt a paraméterként kapott méretből és a kép magasságából, majd ezzel az aránnyal csökkentem a kép szélességét.
 
-\Section{Közös metódusok kiszervezése}
+\Section{Közös metódusok kiszervezése/Python Package(?)}
 
-Írni a saját Python libraryről, hogyan kell használni stb. \cite{pythonlibrary}
+Mint már az előző alfejezetekben említettem, több olyan metódus is előfordult, amit több python-notebook esetén is alkalmaztam. Eleinte csak átmásoltam egyik notebook-ból a másikba a kódot, de ahogy egyre többször ismétlődött ugyanaz a kódrész úgy döntöttem, hogy ideje kiszervezni őket.
+
+Úgy nevezett Python Package-t, Python csomagot készítettem belőlük méghozzá azért, mert egyszerűen használható. A generálása után a \texttt{pip} parancs segítségével futtatható és ha szeretnénk, tudjuk ezeket publikálni is. \cite{pythonlibrary}
+
+Ahhoz hogy létre tudjunk hozni egy ilyen csomagot, szükséges hogy a \texttt{pip} legfrissebb verziója legyen feltelepítve, ezen kívül szükségesek a \texttt{wheel} és a \texttt{setuptools} nevezetű könyvtárak. 
+
+Ha szeretnénk publikálni is a munkákat akkor azt a \texttt{twine} könyvtár segítségével tehetjük meg.
+
+Első lépésként meg kell határoznunk a csomag nevét, érdemes minél rövidebb nevet választani hogy könnyen hivatkozható legyen. Én a \texttt{commonmethods} nevet választottam, mivel a csomag az általánosan használt metódusaimat fogja tartalmazni.
+
+Ezután következik a struktúra felépítése ami nálam a következő:
+\begin{python}
+mycommonmethods/
+|-- setup.py
+|-- commonmethods/
+	|-- __init__.py
+	|-- image_modification.py
+	|-- optimal_cluster_number.py
+\end{python}
+A fájlok a következőket tartalmazzák: 
+\begin{itemize}
+\item \texttt{setup.py}: A setup.py a legfontosabb fájl a könyvtár készítése során, mivel ebben határozzuk meg a telepítési információkat.
+\item \texttt{\_\_init\_\_.py}: Minden mappa ami tartalmaz init fájlt az belekerül a könyvtárunkba a buildelés során. A kód amit ide írunk, az az import során lefut, tehát csak minimális kódot érdemes beleírni. Általában üresen szokták hagyni, az én esetemben is üresen maradt.
+\item \texttt{image\_modification.py}: Ebben a Python fájlban található meg minden olyan metódus, ami a képek módosításához kapcsolódik.
+ \begin{sloppypar} 
+ A \texttt{load\_image\_rgb}, \texttt{load\_image\_grayscale} és a \texttt{resize\_image} metódusok már bemutatásra kerültek a fentebbi alfejezetekben.
+ \end{sloppypar}
+  Ezeken kívül még a \texttt{kmeans\_segmentation} nevezetű metódust tartalmazza, amiről a következő fejezetben írok bővebben.
+\item \texttt{optimal\_cluster\_number.py}: Ebben a Python fájlban az optimális klaszterszám meghatározására használt metódusok találhatók. Részletes bemutatásukat a következő fejezet tartalmazza.
+\end{itemize}
+
+Általában teszt fájlokat is szoktak készíteni a csomag létrehozása során, én ezt a lépést kihagytam. Amennyiben szeretnénk ténylegesen publikálni a munkákat akkor viszont elengedhetetlen a tesztelés annak érdekében, hogy a kiadott verzióink minél stabilabbak legyenek.
+
+Amint felépítettük a struktúránkat és elkészítettük a megfelelő fájlokat, ideje buildelni a könyvtárunkat. Ehhez a \texttt{setup.py} fájlt kell futtatnunk a következő parancs segítségével:
+\begin{python}
+python setup.py bdist_wheel
+\end{python}
+
+Ez generál nekünk egy \texttt{dist} nevű mappát amiben benne lesz egy \texttt{.whl} kiterjesztésű fájl. Ezt a fájlt kell futtassuk a következő módon:
+
+\begin{python}
+pip install /path/wheelfile.whl
+\end{python}
+
+A futtatás után már használható is a könyvtárunk, én a következő módon hivatkozok rá a notebookokban:
+\begin{python}
+import commonmethods.image_modification as im
+import commonmethods.optimal_cluster_number as ocn
+\end{python}
+
+A fájlok listázása során említettem hogy a \texttt{setup.py} a legfontosabb mivel ennek alapján készül el a könyvtárunk, így ennek a tartalmát a következő alfejezetben szeretném részletesen bemutatni.
+
+\SubSection{setup.py}
+
+A \texttt{setup.py} fájl a scriptünk amit a \texttt{setuptools} fog használni hogy elkészítse a könyvtárat. Ebben található meg minden főbb információ a csomagunkról. A következő kódrészlet az én \texttt{setup.py} fájlom ami egy minimális készletet használ, ennél sokkal több argumentumot ismer a \texttt{setup()}. A teljes argumentum lista megtalálható a \cite{setup} oldalon.
+\begin{python}
+from setuptools import setup, find_packages
+
+VERSION = '1.0.0'
+DESCRIPTION = 'Python package for my diploma thesis'
+LONG_DESCRIPTION = 'Python package for my diploma thesis that contains \
+some common methods that I use in different python notebooks'
+
+# Setting up
+setup(
+        name="commonmethods",
+        version=VERSION,
+        author="Fanni Molnar",
+        author_email="<fannimolnr98@gmail.com>",
+        description=DESCRIPTION,
+        long_description=LONG_DESCRIPTION,
+        packages=find_packages(),
+        install_requires=['scikit-learn', 'numpy', 'opencv-python']
+)
+\end{python}
+Az argumentumokról részletesebben: 
+\begin{itemize}
+\item \texttt{name}: Ezen a néven tudjuk majd hivatkozni a könyvtárunkat. Csak betűket, számokat, \_, és - karaktereket tartalmazhat. Amennyiben szeretnénk publikálni a csomagunkat, akkor egyedinek kell lennie a pypi.org oldalon.
+\item \texttt{version}: A csomagunk verziója.
+\item \texttt{author} és \texttt{author\_email}: A készítő adatai.
+\item \texttt{description}: Rövid, egy mondatos leírás ami összefoglalja a csomag tartalmát.
+\item \texttt{long\_description}: Részletes leírása a csomagnak, gyakran használják úgy hogy a \texttt{README.md} fájlból töltik be.
+\item \texttt{packages}: Itt tudjuk megadni, hogy mely csomagokat szeretnénk hozzáadni a könyvtárunkhoz. Egyszerűen használhatjuk a \texttt{find\_packages()} metódust ami automatikusan megtalálja a csomagokat. Az én esetemben az egyedüli csomag a \texttt{commonmethods}.
+\item \texttt{install\_requires}: Itt tudjuk megadni hogy a csomagunk használatához milyen könyvtárak szükségesek. Amennyiben valamelyik csomag hiányzik, azt a telepítés elején automatikusan feltelepíti, ezért itt minden esetben csak az elengedhetetlen könyvtárakat adjuk meg.
+\end{itemize} 
 
 \Section{Tesztelési környezet}
 
