@@ -25,7 +25,7 @@ A klaszterezési algoritmusokat a következő módon tudjuk csoportosítani\cite
 A kutatások során az egyik legnépszerűbb particionáló klaszterezést használtam, a k-means klaszterezést.
 
 \Section{K-means klaszterezés}
-
+%TODO dokumentálás
 \begin{python}
 def kmeans_segmentation(image, k):
     """
@@ -57,11 +57,15 @@ def kmeans_segmentation(image, k):
 \Section{Optimális klaszterszám meghatározása}
 
 Az optimális klaszterszám meghatározásához 4 módszert teszteltem le, ezeknek az eredménye a következő alfejezetekben található.
-A módszereket a \cite{tomatoleaf} és a \cite{elbow} kutatások alapján választottam.
+A módszereket a \cite{tomatoleaf} és a \cite{elbow} kutatások alapján választottam. 
+
+A módszereknél a klaszterekre bontás idejét nem veszem figyelembe, csak magának a módszernek a futási idejét.
 
 \SubSection{Silhouette módszer}
 
-A Silhouette index azt méri, hogy egy adott objektum mennyire hasonlít a saját klaszterében lévő objektumokhoz. Az értéke +1 és -1 között mozog. A nagyobb érték azt jelzi hogy az objektum jól illeszkedik a saját klaszteréhez és rosszul illeszkedik a szomszédos klaszterekhez. Ha a legtöbb obbjektumnak pozitív az értéke akkor a klaszterezés megfelelő, ha sok objektumnak negatív, akkor vagy túl sok a klaszter, vagy túl kevés. A módszer a következő képlettel írható le:
+A Silhouette index azt méri, hogy egy adott objektum mennyire hasonlít a saját klaszterében lévő objektumokhoz. Az értéke +1 és -1 között mozog. A nagyobb érték azt jelzi hogy az objektum jól illeszkedik a saját klaszteréhez és rosszul illeszkedik a szomszédos klaszterekhez. Ha a legtöbb objektumnak pozitív az értéke akkor a klaszterezés megfelelő, ha sok objektumnak negatív, akkor vagy túl sok, vagy túl kevés a klaszter. 
+
+A módszer a következő képlettel írható le:
 
 \[ S(k)=\frac{1}{num} \sum_{i=1}^{num} \frac{b(i)-a(i)}{max\{a(i),b(i)\}} \quad \cite{tomatoleaf} \]
 
@@ -104,6 +108,8 @@ A Silhouette módszer esetén azt tapasztaltam, hogy a futási ideje elég lass�
 \label{fig:silhouette_runtime}
 \end{figure}
 
+Jól látható, hogy míg a 128px méretű képre pár másodperc alatt elvégzi a számítást, az 512px méretű képre már nagyságrendileg 20 percig számol.
+
 \SubSection{Davies-Bouldin módszer}
 A Davies-Bouldin index a klaszteren belüli szóródás összegének és a klaszterek közötti szétválás arányának a függvénye. A célunk az, hogy ezt az értéket minimalizáljuk, hiszen azt szeretnénk hogy a klaszteren belüli szórás minimális, a klaszterek közötti elkülönülés pedig maximális legyen.
 
@@ -120,7 +126,9 @@ ahol
 \end{itemize}
 Ennek eredményeként megkapjuk a Davies-Bouldin pontszámot. Ha elvégezzük ezt a vizsgálatot különböző klaszterszámokra, akkor amelyiknek a pontszáma a legkisebb, az lesz a legoptimálisabb klaszterszám.
 
-Ennek a módszernek a megvalósításához a \texttt{sklearn.metrics} csomagban található \texttt{davies\_bouldin\_score} metódust használtam. A következő kódrészletben látható hogy, a módszer megvalósítása ugyan arra a sémára épül, mint a \texttt{silhouette\_method}. Ez a metódus is megtalálható az általam készített \texttt{commonmethods} csomagban.
+Ennek a módszernek a megvalósításához a \texttt{sklearn.metrics} csomagban található \texttt{davies\_bouldin\_score} metódust használtam. A következő kódrészletben látható, hogy a módszer megvalósítása ugyan arra a sémára épül, mint a \texttt{silhouette\_method}. 
+
+Ez a metódus is megtalálható az általam készített \texttt{commonmethods} csomagban.
 \begin{python}
 def davies_bouldin_method(values, labels):
     """
@@ -164,7 +172,9 @@ ahol
 
 Minél nagyobb a $B(K)$ értéke, annál nagyobb a klaszterek közötti diszperzió mértéke. Minél kisebb a $W(K)$ értéke, annál szorosabb a kapcsolat a klaszteren belül. Minél nagyobb az arány, annál nagyobb a Calinski-Harabasz pontszám értéke, theát annál optimálisabb a klaszterszám.
 
-Ennek a módszernek a megvalósításához a \texttt{sklearn.metrics} csomagban található \texttt{calinski\_harabasz\_score} metódust használtam. A következő kódrészletben látható hogy, a módszer megvalósítása ugyan arra a sémára épül, mint a \texttt{silhouette\_method} és a \texttt{davies\_bouldin\_method}. Ez a metódus is megtalálható az általam készített \texttt{commonmethods} csomagban.
+Ennek a módszernek a megvalósításához a \texttt{sklearn.metrics} csomagban található \texttt{calinski\_harabasz\_score} metódust használtam. A következő kódrészletben látható hogy, a módszer megvalósítása ugyan arra a sémára épül, mint a \texttt{silhouette\_method} és a \texttt{davies\_bouldin\_method}. 
+
+Ez a metódus is megtalálható az általam készített \texttt{commonmethods} csomagban.
 \begin{python}
 def calinski_harabasz_method(values, labels):
     """
@@ -184,11 +194,38 @@ def calinski_harabasz_method(values, labels):
 
 \SubSection{Elbow módszer}
 
-Módszer, futási nehézségek.
+Az Elbow módszer a variancia százalékos arányát vizsgálja a klaszterek számának függvényében. Azon az elven alapszik hogy olyan klaszterszámot kell választanunk, amelyhez ha hozzáadnánk akár csak egy klasztert is, akkor a modellünk már nem javulna számottevő mértékben. 
+
+Az első klaszterek sok információt adnak hozzá a modellhez, viszont egy bizonyos ponton a határnyereség drámaian lecsökken és szöget, vagyis könyököt képez a grafikonon lásd. \ref{fig:elbow_example}. ábra. Innen ered az "elbow" azaz "könyök" módszer elnevezés. Az a pont ahol ez a drámai csökkenés bekövetkezik, az lesz a megfelelő klaszterszám. A \ref{fig:elbow_example}. ábrán ez a pont 2 klaszternél alakul ki, de érdemes lehet megvizsgálni a 3 klasztert is. \cite{elbow}
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.9]{images/elbow_example.png}
+\caption{Példa az Elbow módszerre.}
+\label{fig:elbow_example}
+\end{figure}
+
+Az Elbow metódushoz a \texttt{kmeans\_segmentation} által eredményként visszaadott \texttt{compactness} értékeket szükséges lementenünk különböző méretű klaszterekre ahogy az a következő kódrészletben látható.
+\begin{python}
+import commonmethods.image_modification as im
+
+wcss = []   #within cluster sum of squares
+
+for i in range(1, 11):
+    compactness, pixel_values, labels = \
+        im.kmeans_segmentation(resized_image, i)
+    wcss.append(compactness)
+\end{python}
+
+Ezek után a \texttt{wcss} listát \texttt{plot} segítségével ábrázoljuk és meg is kaptuk az Elbow grafikonunkat, pont úgy mint ahogy a \ref{fig:elbow_example}. ábrán szerepel.
+
+Ennél a módszernél külön számítást nem kell végeznünk, így futási ideje igazából csak maga a kirajzolás.
+
+Összességében a módszer gyors, viszont nem mindig ad egyértelmű eredményt és a töréspont automatizált meghatározása sem egy egyszerű feladat. Vizuális ábrázolásra és kézi ellenőrzésre viszont megfelelő, így főként én is erre a célra használtam.
 
 \SubSection{Összegzés}
 
-A méretek szerinti futási eredményeket a \aref{tab:size_runtimes}. táblázat tartalmazza.
+A módszerek vizsgálata során hamar kiderült, hogy a Silhouette módszer futási ideje számottevően nagyobb a többi módszerétől. Az eredmények összehasonlítását a \ref{tab:size_runtimes}. táblázat tartalmazza. Mivel az Elbow módszer nem egyértelmű és főként vizuális megerősítésként szolgál, így azt a módszert kihagytam a további elemzésekből.
 
 \begin{table}[h]
 \centering
@@ -208,7 +245,7 @@ Calinski-Harabasz módszer & 0.0031s & 0.001s & 0.0028s & 0.0120s \\
 \end{tabular}
 \end{table}
 
-A klaszterszám szerinti futási eredményeket a \aref{tab:cluster_runtimes}. táblázat tartalmazza.
+Mivel a klaszterek számának növelésével a feldolgozandó adathalmaz nem változik így a klaszterek száma nem befolyásolja a módszerek futási idejét. Erre bizonyítékként szolgál a \aref{tab:cluster_runtimes}. táblázat amely különböző klaszterszám esetén mutatja be az átlagos futási időket. Jól látható hogy nem növekszik, sőt valahol csökken a magasabb klaszterszám esetén a futási idő.
 
 \begin{table}[h]
 \centering
@@ -227,3 +264,7 @@ Calinski-Harabasz módszer & 0.0026s & 0.0024s & 0.0028s \\
 \hline
 \end{tabular}
 \end{table}
+
+Természetesen a k-means metódus lassabban határozza meg a klasztereket nagyobb klaszterszám esetén így a nagyobb klaszterszám magának a programnak a futási idejét befolyásolja. 
+
+%TODO Jósági vizsgálat és dokumentálása
