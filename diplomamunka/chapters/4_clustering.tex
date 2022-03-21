@@ -57,26 +57,26 @@ def kmeans_segmentation(image, k):
 \Section{Optimális klaszterszám meghatározása}
 
 Az optimális klaszterszám meghatározásához 4 módszert teszteltem le, ezeknek az eredménye a következő alfejezetekben található.
-A módszereket a \cite{tomatoleaf} és a \cite{elbow} kutatások alapján választottam. 
+A módszereket a \cite{tomatoleaf} és a \cite{elbow} kutatások alapján választottam.
 
 A módszereknél a klaszterekre bontás idejét nem veszem figyelembe, csak magának a módszernek a futási idejét.
 
 \SubSection{Silhouette módszer}
 
-A Silhouette index azt méri, hogy egy adott objektum mennyire hasonlít a saját klaszterében lévő objektumokhoz. Az értéke +1 és -1 között mozog. A nagyobb érték azt jelzi hogy az objektum jól illeszkedik a saját klaszteréhez és rosszul illeszkedik a szomszédos klaszterekhez. Ha a legtöbb objektumnak pozitív az értéke akkor a klaszterezés megfelelő, ha sok objektumnak negatív, akkor vagy túl sok, vagy túl kevés a klaszter. 
+A Silhouette index azt méri, hogy egy adott objektum mennyire hasonlít a saját klaszterében lévő objektumokhoz. Az értéke +1 és -1 között mozog. A nagyobb érték azt jelzi hogy az objektum jól illeszkedik a saját klaszteréhez és rosszul illeszkedik a szomszédos klaszterekhez. Ha a legtöbb objektumnak pozitív az értéke akkor a klaszterezés megfelelő, ha sok objektumnak negatív, akkor vagy túl sok, vagy túl kevés a klaszter.
 
 A módszer a következő képlettel írható le:
 
-\[ S(k)=\frac{1}{num} \sum_{i=1}^{num} \frac{b(i)-a(i)}{max\{a(i),b(i)\}} \quad \cite{tomatoleaf} \]
+\[ S(k)=\frac{1}{num} \sum_{i=1}^{num} \frac{b(i)-a(i)}{max\{a(i),b(i)\}} \quad \]
 
-ahol
+\noindent ahol
 \begin{itemize}
 \item $n$: a klaszterek száma
 \item $num$: a pixelek száma
 \item $a(i)$: az $i$ minta és az ugyanabban a klaszterben lévő többi minta közötti átlagos távolság
 \item $b(i)$: az $i$ minta és az összes többi klaszter mintája közötti távolság minimális értéke
 \end{itemize}
-Ennek eredményeként megkapjuk a Silhouette pontszámot. Ha elvégezzük ezt a vizsgálatot különböző klaszterszámokra, akkor amelyiknek a pontszáma a legnagyobb, az lesz a legoptimálisabb klaszterszám. 
+Ennek eredményeként megkapjuk a Silhouette pontszámot. Ha elvégezzük ezt a vizsgálatot különböző klaszterszámokra, akkor amelyiknek a pontszáma a legnagyobb, az lesz a legoptimálisabb klaszterszám. \cite{tomatoleaf}
 
 Vizsgálataim során a \texttt{sklearn.metrics} csomagban található \texttt{silhouette\_score} módszert használtam a következő kódrészletben látható módon. Ez a metódus megtalálható az általam készített \texttt{commonmethods} csomagban.
 \begin{python}
@@ -115,18 +115,18 @@ A Davies-Bouldin index a klaszteren belüli szóródás összegének és a klasz
 
 A módszer képlete a következő:
 
-\[ DB(k)=\frac{1}{k} \sum_{i=1}^{K} max \left(\frac{W_i + W_j}{C_{ij}}\right)  \quad \cite{tomatoleaf} \]
+\[ DB(k)=\frac{1}{k} \sum_{i=1}^{K} max \left(\frac{W_i + W_j}{C_{ij}}\right)  \quad \]
 
-ahol
+\noindent ahol
 \begin{itemize}
 \item $K$: a klaszterek száma
 \item $W_i$: a $C_i$ osztályba tartozó összes minta átlagos távolsága a klaszter középpontjától
-\item $W_{j}$: a $C_i$ osztályba tartozó összes minta átlagos távolsága a $C_j$ osztály középpontjától 
+\item $W_{j}$: a $C_i$ osztályba tartozó összes minta átlagos távolsága a $C_j$ osztály középpontjától
 \item $C_{ij}$: a $C_i$ és $C_j$ osztályok középpontja közötti távolság
 \end{itemize}
-Ennek eredményeként megkapjuk a Davies-Bouldin pontszámot. Ha elvégezzük ezt a vizsgálatot különböző klaszterszámokra, akkor amelyiknek a pontszáma a legkisebb, az lesz a legoptimálisabb klaszterszám.
+Ennek eredményeként megkapjuk a Davies-Bouldin pontszámot. Ha elvégezzük ezt a vizsgálatot különböző klaszterszámokra, akkor amelyiknek a pontszáma a legkisebb, az lesz a legoptimálisabb klaszterszám. \cite{tomatoleaf}
 
-Ennek a módszernek a megvalósításához a \texttt{sklearn.metrics} csomagban található \texttt{davies\_bouldin\_score} metódust használtam. A következő kódrészletben látható, hogy a módszer megvalósítása ugyan arra a sémára épül, mint a \texttt{silhouette\_method}. 
+Ennek a módszernek a megvalósításához a \texttt{sklearn.metrics} csomagban található \texttt{davies\_bouldin\_score} metódust használtam. A következő kódrészletben látható, hogy a módszer megvalósítása ugyan arra a sémára épül, mint a \texttt{silhouette\_method}.
 
 Ez a metódus is megtalálható az általam készített \texttt{commonmethods} csomagban.
 \begin{python}
@@ -152,17 +152,15 @@ def davies_bouldin_method(values, labels):
 
 A Calinski-Harabasz indexet belső klaszterérvényességi mérőszámként szokták használni, amely a létrehozott klasztereket osztályozza.
 
-A módszer képlete a következő \cite{silhouette_calinski}:
+A módszer képlete a következő:
 
-\begin{equation*}
-\begin{split} \label{}
+\begin{align*}
  CH(k) & =\frac{B(K)(N-K)}{W(K)(K-1)} \\
- & B(K)=\sum_{k=1}^{K}a_k \|\overline{x_k}-\overline{x}\|^2 \\
- & W(K)=\sum_{k=1}^{K}\sum_{C(j)=k}\|x_j-\overline{x_k}\|^2
-\end{split}
-\end{equation*}
+ B(K) & =\sum_{k=1}^{K}a_k \|\overline{x_k}-\overline{x}\|^2 \\
+ W(K) & =\sum_{k=1}^{K}\sum_{C(j)=k}\|x_j-\overline{x_k}\|^2
+\end{align*}
 
-ahol
+\noindent ahol
 \begin{itemize}
 \item $K$: a klaszterek száma
 \item $N$: a minta száma
@@ -170,9 +168,9 @@ ahol
 \item $W(K)$: a klaszteren belüli divergencia, más néven a klaszteren belüli kovariancia
 \end{itemize}
 
-Minél nagyobb a $B(K)$ értéke, annál nagyobb a klaszterek közötti diszperzió mértéke. Minél kisebb a $W(K)$ értéke, annál szorosabb a kapcsolat a klaszteren belül. Minél nagyobb az arány, annál nagyobb a Calinski-Harabasz pontszám értéke, theát annál optimálisabb a klaszterszám.
+Minél nagyobb a $B(K)$ értéke, annál nagyobb a klaszterek közötti diszperzió mértéke. Minél kisebb a $W(K)$ értéke, annál szorosabb a kapcsolat a klaszteren belül. Minél nagyobb az arány, annál nagyobb a Calinski-Harabasz pontszám értéke, theát annál optimálisabb a klaszterszám. \cite{silhouette_calinski}
 
-Ennek a módszernek a megvalósításához a \texttt{sklearn.metrics} csomagban található \texttt{calinski\_harabasz\_score} metódust használtam. A következő kódrészletben látható hogy, a módszer megvalósítása ugyan arra a sémára épül, mint a \texttt{silhouette\_method} és a \texttt{davies\_bouldin\_method}. 
+Ennek a módszernek a megvalósításához a \texttt{sklearn.metrics} csomagban található \texttt{calinski\_harabasz\_score} metódust használtam. A következő kódrészletben látható hogy, a módszer megvalósítása ugyan arra a sémára épül, mint a \texttt{silhouette\_method} és a \texttt{davies\_bouldin\_method}.
 
 Ez a metódus is megtalálható az általam készített \texttt{commonmethods} csomagban.
 \begin{python}
@@ -194,7 +192,7 @@ def calinski_harabasz_method(values, labels):
 
 \SubSection{Elbow módszer}
 
-Az Elbow módszer a variancia százalékos arányát vizsgálja a klaszterek számának függvényében. Azon az elven alapszik hogy olyan klaszterszámot kell választanunk, amelyhez ha hozzáadnánk akár csak egy klasztert is, akkor a modellünk már nem javulna számottevő mértékben. 
+Az Elbow módszer a variancia százalékos arányát vizsgálja a klaszterek számának függvényében. Azon az elven alapszik hogy olyan klaszterszámot kell választanunk, amelyhez ha hozzáadnánk akár csak egy klasztert is, akkor a modellünk már nem javulna számottevő mértékben.
 
 Az első klaszterek sok információt adnak hozzá a modellhez, viszont egy bizonyos ponton a határnyereség drámaian lecsökken és szöget, vagyis könyököt képez a grafikonon lásd. \ref{fig:elbow_example}. ábra. Innen ered az "elbow" azaz "könyök" módszer elnevezés. Az a pont ahol ez a drámai csökkenés bekövetkezik, az lesz a megfelelő klaszterszám. A \ref{fig:elbow_example}. ábrán ez a pont 2 klaszternél alakul ki, de érdemes lehet megvizsgálni a 3 klasztert is. \cite{elbow}
 
@@ -245,7 +243,7 @@ Calinski-Harabasz módszer & 0.0031s & 0.001s & 0.0028s & 0.0120s \\
 \end{tabular}
 \end{table}
 
-Mivel a klaszterek számának növelésével a feldolgozandó adathalmaz nem változik így a klaszterek száma nem befolyásolja a módszerek futási idejét. Erre bizonyítékként szolgál a \aref{tab:cluster_runtimes}. táblázat amely különböző klaszterszám esetén mutatja be az átlagos futási időket. Jól látható hogy nem növekszik, sőt valahol csökken a magasabb klaszterszám esetén a futási idő.
+Mivel a klaszterek számának növelésével a feldolgozandó adathalmaz nem változik így a klaszterek száma nem befolyásolja a módszerek futási idejét. Erre bizonyítékként szolgál a \ref{tab:cluster_runtimes}. táblázat amely különböző klaszterszám esetén mutatja be az átlagos futási időket. Jól látható hogy nem növekszik, sőt valahol csökken a magasabb klaszterszám esetén a futási idő.
 
 \begin{table}[h]
 \centering
@@ -265,6 +263,6 @@ Calinski-Harabasz módszer & 0.0026s & 0.0024s & 0.0028s \\
 \end{tabular}
 \end{table}
 
-Természetesen a k-means metódus lassabban határozza meg a klasztereket nagyobb klaszterszám esetén így a nagyobb klaszterszám magának a programnak a futási idejét befolyásolja. 
+Természetesen a k-means metódus lassabban határozza meg a klasztereket nagyobb klaszterszám esetén így a nagyobb klaszterszám magának a programnak a futási idejét befolyásolja.
 
-%TODO Jósági vizsgálat és dokumentálása
+%TODO Jósági vizsgálat és dokumentálása 

@@ -75,13 +75,13 @@ def resize_image(image, wanted_height) :
 \end{python}
 Bemenetként magát a képet várja és azt a méretet px-ben, amire a magasságot szeretnénk változtatni. Hogy ne torzuljon a kép, kiszámítok egy arányt a paraméterként kapott méretből és a kép magasságából, majd ezzel az aránnyal csökkentem a kép szélességét.
 
-\Section{Közös metódusok kiszervezése/Python Package(?)}
+\Section{Közös metódusok kiszervezése}
 
 Mint már az előző alfejezetekben említettem, több olyan metódus is előfordult, amit több python-notebook esetén is alkalmaztam. Eleinte csak átmásoltam egyik notebook-ból a másikba a kódot, de ahogy egyre többször ismétlődött ugyanaz a kódrész úgy döntöttem, hogy ideje kiszervezni őket.
 
 Úgy nevezett Python Package-t, Python csomagot készítettem belőlük méghozzá azért, mert egyszerűen használható. A generálása után a \texttt{pip} parancs segítségével futtatható és ha szeretnénk, tudjuk ezeket publikálni is. \cite{pythonlibrary}
 
-Ahhoz hogy létre tudjunk hozni egy ilyen csomagot, szükséges hogy a \texttt{pip} legfrissebb verziója legyen feltelepítve, ezen kívül szükségesek a \texttt{wheel} és a \texttt{setuptools} nevezetű könyvtárak. 
+Ahhoz hogy létre tudjunk hozni egy ilyen csomagot, szükséges hogy a \texttt{pip} legfrissebb verziója legyen feltelepítve, ezen kívül szükségesek a \texttt{wheel} és a \texttt{setuptools} nevezetű könyvtárak.
 
 Ha szeretnénk publikálni is a munkákat akkor azt a \texttt{twine} könyvtár segítségével tehetjük meg.
 
@@ -96,12 +96,12 @@ mycommonmethods/
 	|-- image_modification.py
 	|-- optimal_cluster_number.py
 \end{python}
-A fájlok a következőket tartalmazzák: 
+A fájlok a következőket tartalmazzák:
 \begin{itemize}
 \item \texttt{setup.py}: A setup.py a legfontosabb fájl a könyvtár készítése során, mivel ebben határozzuk meg a telepítési információkat.
 \item \texttt{\_\_init\_\_.py}: Minden mappa ami tartalmaz init fájlt az belekerül a könyvtárunkba a buildelés során. A kód amit ide írunk, az az import során lefut, tehát csak minimális kódot érdemes beleírni. Általában üresen szokták hagyni, az én esetemben is üresen maradt.
 \item \texttt{image\_modification.py}: Ebben a Python fájlban található meg minden olyan metódus, ami a képek módosításához kapcsolódik.
- \begin{sloppypar} 
+ \begin{sloppypar}
  A \texttt{load\_image\_rgb}, \texttt{load\_image\_grayscale} és a \texttt{resize\_image} metódusok már bemutatásra kerültek a fentebbi alfejezetekben.
  \end{sloppypar}
   Ezeken kívül még a \texttt{kmeans\_segmentation} nevezetű metódust tartalmazza, amiről a következő fejezetben írok bővebben.
@@ -152,7 +152,7 @@ setup(
         install_requires=['scikit-learn', 'numpy', 'opencv-python']
 )
 \end{python}
-Az argumentumokról részletesebben: 
+Az argumentumokról részletesebben:
 \begin{itemize}
 \item \texttt{name}: Ezen a néven tudjuk majd hivatkozni a könyvtárunkat. Csak betűket, számokat, \_, és - karaktereket tartalmazhat. Amennyiben szeretnénk publikálni a csomagunkat, akkor egyedinek kell lennie a pypi.org oldalon.
 \item \texttt{version}: A csomagunk verziója.
@@ -161,7 +161,7 @@ Az argumentumokról részletesebben:
 \item \texttt{long\_description}: Részletes leírása a csomagnak, gyakran használják úgy hogy a \texttt{README.md} fájlból töltik be.
 \item \texttt{packages}: Itt tudjuk megadni, hogy mely csomagokat szeretnénk hozzáadni a könyvtárunkhoz. Egyszerűen használhatjuk a \texttt{find\_packages()} metódust ami automatikusan megtalálja a csomagokat. Az én esetemben az egyedüli csomag a \texttt{commonmethods}.
 \item \texttt{install\_requires}: Itt tudjuk megadni hogy a csomagunk használatához milyen könyvtárak szükségesek. Amennyiben valamelyik csomag hiányzik, azt a telepítés elején automatikusan feltelepíti, ezért itt minden esetben csak az elengedhetetlen könyvtárakat adjuk meg.
-\end{itemize} 
+\end{itemize}
 
 \Section{Tesztelési környezet}
 
@@ -169,6 +169,6 @@ A programkódok tesztelését minden esetben az otthoni számítógépemen vége
 \begin{itemize}
 \item Processzor: Intel(R) Core(TM) i5-9400F CPU 2.90GHz
 \item Memória mérete: 16 GB
-\item (?) Videókártya: NVIDIA GeForce GTX 1660
+\item Videókártya: NVIDIA GeForce GTX 1660
 \item Operációs rendszer: Windows 10 Enterprise
 \end{itemize} 
