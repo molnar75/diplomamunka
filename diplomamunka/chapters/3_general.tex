@@ -6,7 +6,45 @@ Ebben a fejezetben néhány általános információ található, amik a dolgoza
 
 A teszteléshez csendéletekről készült képeket gyűjtöttem az unsplash nevezetű weboldalról. \cite{unsplash}
 A csendéleteken a tárgyak intenzitása jól elkülönül a háttér intenzitásától így egyszerűbben lehet rajta szegmentálást végrehajtani.
-A képek nevei a 0 és 5 közötti számok, pl. 0.jpg.
+A képek a \ref{fig:images} ábrán láthatóak, a neveik a 0 és 5 közötti számok, pl. 0.jpg.
+
+\begin{figure}[htb]
+    \centering % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{../images/0.jpg}
+  \caption*{0.jpg}
+  \label{fig:0jpg}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{../images/1.jpg}
+  \caption*{1.jpg}
+  \label{fig:1jpg}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{../images/2.jpg}
+  \caption*{2.jpg}
+  \label{fig:2jpg}
+\end{subfigure}
+
+\medskip
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{../images/3.jpg}
+  \caption*{3.jpg}
+  \label{fig:3jpg}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{../images/4.jpg}
+  \caption*{4.jpg}
+  \label{fig:4jpg}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{../images/5.jpg}
+  \caption*{5.jpg}
+  \label{fig:5jpg}
+\end{subfigure}
+\caption{Felhasznált képek}
+\label{fig:images}
+\end{figure}
 
 \Section{Képek feldolgozása}
 
