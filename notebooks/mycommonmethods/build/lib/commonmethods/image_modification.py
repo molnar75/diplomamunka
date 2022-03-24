@@ -27,7 +27,7 @@ def resize_image(image, desired_height) :
     """
     Resizing the image for the given height, without disortion, using opencv-python
     :param image: the image that I want to resize
-    :param wanted_height: the height in pixel that I want to have in the resized image
+    :param desired_height: the height in pixel that I want to have in the resized image
     :return: the resized image
     """
     height = image.shape[0]
