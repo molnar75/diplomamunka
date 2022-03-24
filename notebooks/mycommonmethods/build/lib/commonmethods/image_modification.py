@@ -47,7 +47,12 @@ def kmeans_segmentation(image, k):
     :param k: the number of the clusters
     :return: the compactness, the pixel_values and the labels from the k-means method
     """
-    pixel_values = image.reshape((-1, 1))
+    #check if the image is grayscale or rgb and reshape the pixels
+    if(len(image.shape)<3):
+        pixel_values = image.reshape((-1, 1))
+    else:
+        pixel_values = image.reshape((-1, 3))
+    
     pixel_values = np.float32(pixel_values)
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
@@ -55,4 +60,4 @@ def kmeans_segmentation(image, k):
 
     labels = labels.flatten()
     
-    return compactness, pixel_values, labels
+    return compactness, pixel_values, labels, (centers)
