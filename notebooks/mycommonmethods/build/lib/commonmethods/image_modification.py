@@ -45,7 +45,7 @@ def kmeans_segmentation(image, k):
     Segmenting the image using opencv-python's k-means method 
     :param image: the image that I want to carry out the segmentation
     :param k: the number of the clusters
-    :return: the compactness, the pixel_values and the labels from the k-means method
+    :return: the compactness, the pixel_values, the labels and the centers from the k-means method
     """
     #check if the image is grayscale or rgb and reshape the pixels
     if(len(image.shape)<3):
