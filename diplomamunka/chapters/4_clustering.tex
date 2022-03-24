@@ -25,17 +25,42 @@ A klaszterezési algoritmusokat a következő módon tudjuk csoportosítani\cite
 A kutatások során az egyik legnépszerűbb particionáló klaszterezést használtam, a k-means klaszterezést.
 
 \Section{K-means klaszterezés}
-%TODO dokumentálás
+A klaszterezés célja hogy egy adatlhalmazt diszjunkt részhalmazokra (klaszterekre) ossza fel méghozzá úgy, hogy a klaszterezési kritérium optimális legyen. A legelterjedtebb klaszterezési kritérium az egyes adatpontok és az azokat tartalmazó részhalmaz súlypontja (klaszterközéppont) közötti négyzetes Euklidészi távolságok összege. Ezt hívják klaszterezési hibának és ezt szeretnék optimalizálni. \cite{kmeans}
+
+A K-means algoritmus lokálisan optimális megoldásokat talál figyelembe véve a klaszterezési hibát. Ez egy gyors, iteratív módszer aminek az algoritmusa a következő \cite{tomatoleaf}:
+\begin{enumerate}
+\item lépés: véletlenszerűen kiválaszt $K$ darab klaszterközéppontot
+\item lépés: meghatározza az egyes pontok távolságát a középpontoktól valamilyen távolságfüggvény szerint, majd besorolja az egyes pontokat a hozzájuk legközelebbi klaszterközéppont kategóriájába
+\item lépés: kiszámítja az egyes klaszterek számtani átlagát és az lesz az új klaszterközéppont
+\item lépés: megnézi, hogy a klaszterközéppontok helyzetében történt-e változás:
+    \begin{enumerate}
+    \item ha igen, akkor megismétli az algoritmust a 2. lépéstől
+    \item ha nem, akkor megáll az algoritmus mivel megtalálta az optimális klasztereket
+    \end{enumerate}
+\end{enumerate}
+
+A módszer nagy előnye hogy könnyen megvalósítható, viszont az algoritmusból láthatóak a módszer hátrányai is.
+
+A végső klaszterezés a kezdeti klaszterközéppontok helyzetétől és a $K$ értékétől függ. A $K$ a klaszterek számát jelöli, és ezt az értéket nekünk kell meghatároznunk még a klaszterezési algoritmus futása előtt. Két K-means futási eredmény nagyban különbözhet, hiszen a középpontok kezdeti értéke véletlenszerű. Ahhoz, hogy ténylegesen az optimális eredményt kapjuk, érdemes az algoritmust többször futtatni.
+
+Az optimális klaszterszám meghatározására több módszert is kipróbáltam, ezeket a \ref{optimal_cluster_number} alfejezetben ismertetem.
+
+A kutatásom során a \texttt{opencv-python} könyvtárban található K-means metódust használtam. Mivel a szegmentálás ez egyik fő eleme a kutatásomnak, így ezt is kiszerveztem az általam készített \texttt{commonmethods} könyvtárba \texttt{kmeans\_segmentation} néven. A következő kódrészletben látható az általam megírt algoritmus.
 \begin{python}
 def kmeans_segmentation(image, k):
     """
     Segmenting the image using opencv-python's k-means method
     :param image: the image that I want to carry out the segmentation
     :param k: the number of the clusters
-    :return: the compactness, the pixel_values and the labels
-        from the k-means method
+    :return: the compactness, the pixel_values, the labels and the
+        centers from the k-means method
     """
-    pixel_values = image.reshape((-1, 1))
+    #check if the image is grayscale or rgb and reshape the pixels
+    if(len(image.shape)<3):
+        pixel_values = image.reshape((-1, 1))
+    else:
+        pixel_values = image.reshape((-1, 3))
+        
     pixel_values = np.float32(pixel_values)
 
     criteria = \
@@ -51,10 +76,42 @@ def kmeans_segmentation(image, k):
 
     labels = labels.flatten()
 
-    return compactness, pixel_values, labels
+    return compactness, pixel_values, labels, (centers)
 \end{python}
 
-\Section{Optimális klaszterszám meghatározása}
+Bemeneti paraméterként a képet és a klaszterek számát várja a metódus. Első lépésként átalakítom a kép pixeleit a \texttt{cv2.kemans} metódusnak megfelelő formátumra. Mivel a színes és a szürkeárnyalatos képek pixeleinek a dimenziója különböző, így először meg kell határoznom hogy milyen színterű képet kaptam, és ennek függvényében alakítom a pixeleket a megfelelő dimenziójú tömbbé. (?)
+
+Maga a \texttt{cv2.kmeans} a következő paramétereket várja \cite{kmeans_opencv}:
+\begin{itemize}
+\item \texttt{samples}: \texttt{np.float32} típusú és a jellemzők különböző oszlopokban helyezkednek el.
+\item \texttt{nclusters(K)}: A klaszterek száma.
+\item \texttt{bestLabels}: Bemeneti/kimeneti tömb amely minden mintához eltárolja a klaszterindexet.
+\item \texttt{criteria}: Ez az iterációs kritérium. Ha ez teljesül, akkor az algoritmus megáll. A típusa tuple ami 3 paramétert tartalmaz:
+    \begin{itemize}
+    \item \texttt{type}: A leállási kritériumnak a típusa, 3 flagje (?) létezik:
+        \begin{itemize}
+        \item \texttt{cv.TERM\_CRITERIA\_EPS}: Akkor áll meg az algoritmus, ha elértük a kívánt pontosságot.
+        \item \texttt{cv.TERM\_CRITERIA\_MAX\_ITER}: Akkor áll meg az algoritmus, ha elértük a maximális iterációk számát.
+        \item \texttt{cv.TERM\_CRITERIA\_EPS} + \texttt{cv.TERM\_CRITERIA\_MAX\_ITER}: Akkor áll le az algoritmus, ha az előző két flag közül bármelyik bekövetkezik.
+        \end{itemize}
+    \item \texttt{max\_iter}: Az iterációk maximális száma.
+    \item \texttt{epsilon}: Az elvárt pontosság.
+    \end{itemize}
+\item \texttt{attempts}: Azt adjuk meg, hogy hányszor fusson le az algoritmus különböző klasztereket eredményezve. A visszatérési érték a legoptimálisabb klaszter lesz.
+\item \texttt{flags}: A kezdeti középpontok felvételének a módját tudjuk megadni. Általában 2 típusa van:
+    \begin{itemize}
+    \item \texttt{cv.KMEANS\_PP\_CENTERS}: Arthur és Vassilvitskii kmeans++ középpont inicializálási metódusát használva határozza meg a középpontokat.
+    \item \texttt{cv.KMEANS\_RANDOM\_CENTERS}: Random határozza meg a középpontokat.
+    \end{itemize}
+\end{itemize}
+
+ A paramétereket úgy állítottam be hogy 10 alkalommal fusson le az algoritmus, és a klaszterek kezdő középpontját random határozza meg. Ezen kívül az algoritmus megáll ha eléri vagy a maximális iterációk számát ami 100, vagy a megfelelő pontosságot ami 0.2. 
+ 
+ Ezeket a paramétereket a \cite{kmeans_opencv} dokumentáció alapján határoztam meg, egyedül a pontosságot, az \texttt{epsilon} értékét állítottam kisebbre mint a dokumentációban szereplő érték.
+ 
+ 
+
+\Section{Optimális klaszterszám meghatározása} \label{optimal_cluster_number}
 
 Az optimális klaszterszám meghatározásához 4 módszert teszteltem le, ezeknek az eredménye a következő alfejezetekben található.
 A módszereket a \cite{tomatoleaf} és a \cite{elbow} kutatások alapján választottam.
@@ -209,9 +266,9 @@ import commonmethods.image_modification as im
 
 wcss = []   #within cluster sum of squares
 
-for i in range(1, 11):
-    compactness, pixel_values, labels = \
-        im.kmeans_segmentation(resized_image, i)
+for k in range(1, 11):
+    compactness, _, _, _ = \
+        im.kmeans_segmentation(resized_image, k)
     wcss.append(compactness)
 \end{python}
 
@@ -265,4 +322,4 @@ Calinski-Harabasz módszer & 0.0026s & 0.0024s & 0.0028s \\
 
 Természetesen a k-means metódus lassabban határozza meg a klasztereket nagyobb klaszterszám esetén így a nagyobb klaszterszám magának a programnak a futási idejét befolyásolja.
 
-%TODO Jósági vizsgálat és dokumentálása 
+%TODO Jósági vizsgálat és dokumentálása
