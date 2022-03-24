@@ -23,7 +23,7 @@ def load_image_rgb(name):
     
     return image
 
-def resize_image(image, wanted_height) :
+def resize_image(image, desired_height) :
     """
     Resizing the image for the given height, without disortion, using opencv-python
     :param image: the image that I want to resize
@@ -32,9 +32,9 @@ def resize_image(image, wanted_height) :
     """
     height = image.shape[0]
     # calculating the amount with I need to change the width
-    scale_percent = height / wanted_height
+    scale_percent = height / desired_height
     width = int(image.shape[0] / scale_percent)
-    dim = (width, wanted_height)
+    dim = (width, desired_height)
     
     resized_image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
     
