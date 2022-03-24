@@ -108,8 +108,20 @@ Maga a \texttt{cv2.kmeans} a következő paramétereket várja \cite{kmeans_open
  A paramétereket úgy állítottam be hogy 10 alkalommal fusson le az algoritmus, és a klaszterek kezdő középpontját random határozza meg. Ezen kívül az algoritmus megáll ha eléri vagy a maximális iterációk számát ami 100, vagy a megfelelő pontosságot ami 0.2. 
  
  Ezeket a paramétereket a \cite{kmeans_opencv} dokumentáció alapján határoztam meg, egyedül a pontosságot, az \texttt{epsilon} értékét állítottam kisebbre mint a dokumentációban szereplő érték.
- 
- 
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{images/kmeans_grayscale.png}
+\caption{K-means módszer futási eredménye szürkeárnyalatos kép esetén, különböző klaszterszámokra}
+\label{fig:kmenas_grayscale}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{images/kmeans_rgb.png}
+\caption{K-means módszer futási eredménye színes kép esetén, különböző klaszterszámokra}
+\label{fig:kmenas_rgb}
+\end{figure}
 
 \Section{Optimális klaszterszám meghatározása} \label{optimal_cluster_number}
 
@@ -160,7 +172,7 @@ A Silhouette módszer esetén azt tapasztaltam, hogy a futási ideje elég lass�
 
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.9]{images/silhouette_runtime.png}
+\includegraphics[scale=0.7]{images/silhouette_runtime.png}
 \caption{A Silhouette módszer futási ideje különböző képméretekre.}
 \label{fig:silhouette_runtime}
 \end{figure}
@@ -249,13 +261,13 @@ def calinski_harabasz_method(values, labels):
 
 \SubSection{Elbow módszer}
 
-Az Elbow módszer a variancia százalékos arányát vizsgálja a klaszterek számának függvényében. Azon az elven alapszik hogy olyan klaszterszámot kell választanunk, amelyhez ha hozzáadnánk akár csak egy klasztert is, akkor a modellünk már nem javulna számottevő mértékben.
+Az Elbow módszer a variancia százalékos arányát vizsgálja a klaszterek számának függvényében. Azon az elven alapszik, hogy olyan klaszterszámot kell választanunk amelyhez ha hozzáadnánk akár csak egy klasztert is, akkor a modellünk már nem javulna számottevő mértékben.
 
-Az első klaszterek sok információt adnak hozzá a modellhez, viszont egy bizonyos ponton a határnyereség drámaian lecsökken és szöget, vagyis könyököt képez a grafikonon lásd. \ref{fig:elbow_example}. ábra. Innen ered az "elbow" azaz "könyök" módszer elnevezés. Az a pont ahol ez a drámai csökkenés bekövetkezik, az lesz a megfelelő klaszterszám. A \ref{fig:elbow_example}. ábrán ez a pont 2 klaszternél alakul ki, de érdemes lehet megvizsgálni a 3 klasztert is. \cite{elbow}
+Az első klaszterek sok információt adnak hozzá a modellhez, viszont egy bizonyos ponton a határnyereség drámaian lecsökken és szöget, vagyis könyököt képez a grafikonon (lásd. \ref{fig:elbow_example}. ábra). Innen ered az "elbow" azaz "könyök" módszer elnevezés. Az a pont ahol ez a drámai csökkenés bekövetkezik, az lesz a megfelelő klaszterszám. A \ref{fig:elbow_example}. ábrán ez a pont 2 klaszternél alakul ki, de érdemes lehet megvizsgálni a 3 klasztert is. \cite{elbow}
 
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.9]{images/elbow_example.png}
+\includegraphics[scale=0.7]{images/elbow_example.png}
 \caption{Példa az Elbow módszerre.}
 \label{fig:elbow_example}
 \end{figure}
@@ -272,7 +284,7 @@ for k in range(1, 11):
     wcss.append(compactness)
 \end{python}
 
-Ezek után a \texttt{wcss} listát \texttt{plot} segítségével ábrázoljuk és meg is kaptuk az Elbow grafikonunkat, pont úgy mint ahogy a \ref{fig:elbow_example}. ábrán szerepel.
+Ha a \texttt{wcss} listát \texttt{plot} segítségével ábrázoljuk, meg is kaptuk az Elbow grafikonunkat pont úgy, mint ahogy a \ref{fig:elbow_example}. ábrán szerepel.
 
 Ennél a módszernél külön számítást nem kell végeznünk, így futási ideje igazából csak maga a kirajzolás.
 
@@ -300,7 +312,9 @@ Calinski-Harabasz módszer & 0.0031s & 0.001s & 0.0028s & 0.0120s \\
 \end{tabular}
 \end{table}
 
-Mivel a klaszterek számának növelésével a feldolgozandó adathalmaz nem változik így a klaszterek száma nem befolyásolja a módszerek futási idejét. Erre bizonyítékként szolgál a \ref{tab:cluster_runtimes}. táblázat amely különböző klaszterszám esetén mutatja be az átlagos futási időket. Jól látható hogy nem növekszik, sőt valahol csökken a magasabb klaszterszám esetén a futási idő.
+A táblázat jól szemlélteti, hogy a Silhouette módszer futási ideje már a legkisebb képméretre is majdnem negyveszerese a másik két módszer futási idejének. 
+
+Mivel a klaszterek számának növelésével a feldolgozandó adathalmaz nem változik, így a klaszterek száma nem befolyásolja a módszerek futási idejét. Erre bizonyítékként szolgál a \ref{tab:cluster_runtimes}. táblázat amely különböző klaszterszám esetén mutatja be az átlagos futási időket. Jól látható hogy nem növekszik, sőt valahol csökken a magasabb klaszterszám esetén a futási idő.
 
 \begin{table}[h]
 \centering
@@ -321,5 +335,7 @@ Calinski-Harabasz módszer & 0.0026s & 0.0024s & 0.0028s \\
 \end{table}
 
 Természetesen a k-means metódus lassabban határozza meg a klasztereket nagyobb klaszterszám esetén így a nagyobb klaszterszám magának a programnak a futási idejét befolyásolja.
+
+A futási idők mellett a módszerek jóságát is megvizsgáltam mind színes, mind szürkeárnyalatos képek esetén. 
 
 %TODO Jósági vizsgálat és dokumentálása
