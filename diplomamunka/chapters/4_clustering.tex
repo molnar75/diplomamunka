@@ -1,6 +1,6 @@
 \Chapter{Klaszterezés}
 
-Ahhoz, hogy szürkeárnyalatos képeket megfelelően tudjunk kiszínezni, első lépésként meg kell határoznunk a kiszínezendő területeket. El kell döntenünk hogy a kép mely részei tartoznak ugyan ahhoz a színárnyalathoz és melyek nem. Ezek alapján a dolgozat 2 fő részre bontható:
+Ahhoz, hogy szürkeárnyalatos képeket megfelelően tudjunk kiszínezni, első lépésként meg kell határoznunk a kiszínezendő területeket. El kell döntenünk, hogy a kép mely részei tartoznak ugyan ahhoz a színárnyalathoz és melyek nem. Ezek alapján a dolgozat 2 fő részre bontható:
 \begin{itemize}
 \item képszegmentálás
 \item szegmensek kiszínezése
@@ -10,7 +10,7 @@ A képszegmentálás célja az, hogy a képen lévő különböző célterülete
 
 A két módszer célja lényegében megegyezik egymással. Ahhoz hogy a képből ki tudjuk nyerni a megfelelő szegmenseket, valamilyen klaszterezési eljárást kell alkalmaznunk.
 
-A klaszterezési algoritmusokat a következő módon tudjuk csoportosítani\cite{clustering}:
+A klaszterezési algoritmusokat a következő módon tudjuk csoportosítani \cite{clustering}:
 \begin{itemize}
 \item hierarchikus: a korábban létrehozott klaszterek felhasználásával találja meg az egymást követő klasztereket
     \begin{itemize}
@@ -43,7 +43,7 @@ A módszer nagy előnye hogy könnyen megvalósítható, viszont az algoritmusb�
 
 A végső klaszterezés a kezdeti klaszterközéppontok helyzetétől és a $K$ értékétől függ. A $K$ a klaszterek számát jelöli, és ezt az értéket nekünk kell meghatároznunk még a klaszterezési algoritmus futása előtt. Két K-means futási eredmény nagyban különbözhet, hiszen a középpontok kezdeti értéke véletlenszerű. Ahhoz, hogy ténylegesen az optimális eredményt kapjuk, érdemes az algoritmust többször futtatni.
 
-Az optimális klaszterszám meghatározására több módszert is kipróbáltam, ezeket a \ref{optimal_cluster_number} alfejezetben ismertetem.
+Az optimális klaszterszám meghatározására több módszert is kipróbáltam, ezeket a \ref{optimal_cluster_number}. alfejezetben ismertetem.
 
 A kutatásom során a \texttt{opencv-python} könyvtárban található K-means metódust használtam. Mivel a szegmentálás ez egyik fő eleme a kutatásomnak, így ezt is kiszerveztem az általam készített \texttt{commonmethods} könyvtárba \texttt{kmeans\_segmentation} néven. A következő kódrészletben látható az általam megírt algoritmus.
 \begin{python}
@@ -79,11 +79,11 @@ def kmeans_segmentation(image, k):
     return compactness, pixel_values, labels, (centers)
 \end{python}
 
-Bemeneti paraméterként a képet és a klaszterek számát várja a metódus. Első lépésként átalakítom a kép pixeleit a \texttt{cv2.kemans} metódusnak megfelelő formátumra. Mivel a színes és a szürkeárnyalatos képek pixeleinek a dimenziója különböző, így először meg kell határoznom hogy milyen színterű képet kaptam, és ennek függvényében alakítom a pixeleket a megfelelő dimenziójú tömbbé. (?)
+Bemeneti paraméterként a képet és a klaszterek számát várja a metódus. Első lépésként átalakítom a kép pixeleit a \texttt{cv2.kemans} metódusnak megfelelő formátumra. Mivel a színes és a szürkeárnyalatos képek pixeleinek a dimenziója különböző, így először meg kell határoznom hogy milyen színterű képet kaptam, és ennek függvényében alakítom a pixeleket a megfelelő dimenziójú tömbbé.
 
 Maga a \texttt{cv2.kmeans} a következő paramétereket várja \cite{kmeans_opencv}:
 \begin{itemize}
-\item \texttt{samples}: \texttt{np.float32} típusú és a jellemzők különböző oszlopokban helyezkednek el.
+\item \texttt{samples}: Egy tömb amely \texttt{np.float32} típusú és a jellemzők külön oszlopokban helyezkednek el.
 \item \texttt{nclusters(K)}: A klaszterek száma.
 \item \texttt{bestLabels}: Bemeneti/kimeneti tömb amely minden mintához eltárolja a klaszterindexet.
 \item \texttt{criteria}: Ez az iterációs kritérium. Ha ez teljesül, akkor az algoritmus megáll. A típusa tuple ami 3 paramétert tartalmaz:
@@ -111,7 +111,7 @@ Maga a \texttt{cv2.kmeans} a következő paramétereket várja \cite{kmeans_open
  
  Az algoritmus szegmentálási eredménye különböző számú klaszterekre a \ref{fig:kmenas_grayscale}. ábrán látható szürkeárnyalatos képek esetén, és a \ref{fig:kmenas_rgb}. ábrán látható színes képek esetén. Mind a két esetben 2, 4, és 8 értékeket állítottam be a klaszterek számának. 
  
- A szegementált képeket a \texttt{kmeans\_segmentation} által előállított \texttt{labels} és \texttt{centers} értékek segítségével állítom elő. Az egy kategóriába tartozó pixeleket kiszínezem a kategóriájuk középpontjával megegyező színnel a következő kódrészletben látható módon.
+ A szegementált képeket a \texttt{kmeans\_segmentation} által előállított \texttt{labels} és \texttt{centers} értékek segítségével rajzolom ki. Az egy kategóriába tartozó pixeleket kiszínezem a kategóriájuk középpontjával megegyező színnel a következő kódrészletben látható módon.
  
 \begin{python}
 centers = np.uint8(centers)
@@ -119,7 +119,7 @@ segmented_image = centers[labels.flatten()]
 segmented_image = segmented_image.reshape(image.shape)
 \end{python}
 
-Először a középpontok értékét \texttt{np.float32} típusról átalakítom integer típusra, majd a \texttt{labels} értékek alapján létrehozzuk a szegmentált kép pixeleit tartalmazó tömböt. Ez a tömb egy dimenziós lesz, így kirajzolás előtt át kell alakítanunk az eredeti képpel megegyező formátumúra.
+Először a középpontok értékét \texttt{np.float32} típusról átalakítom integer típusra, majd a \texttt{labels} értékek alapján létrehozom a szegmentált kép pixeleit tartalmazó tömböt. Ez a tömb egy dimenziós lesz, így kirajzolás előtt átalakítom az eredeti képpel megegyező formátumra.
 
 \begin{figure}[h]
 \centering
@@ -153,9 +153,9 @@ Jól látható, hogy a klaszterek számának növelésével a futási idő nem m
 \label{fig:kmenas_runtime_size}
 \end{figure}
 
-A futási idők után megvizsgáltam, hogy vajon különböző méretű képekre mennyire pontos a klaszterezés. Klaszterek számának 4-et adtam meg, a klaszterezést pedig elvégeztem 64px, 128px, 256px és 512px méretű képekre. A futási eredményeket a \ref{fig:kmenas_picture_sizes}. ábra tartalmazza.
+A futási idők után megvizsgáltam, hogy vajon különböző méretű képekre mennyire pontos a klaszterezés. A klaszterek számának 4-et adtam meg, a klaszterezést pedig elvégeztem 64px, 128px, 256px és 512px méretű képekre. A futási eredményeket a \ref{fig:kmenas_picture_sizes}. ábra tartalmazza.
 
-Egyértelműen látszik hogy már a legkisebb, 64px méretű képen is ugyan azokat a klasztereket találja meg mint a legnagyobb, 512px méretű képen. 
+Egyértelműen látszik, hogy már a legkisebb, 64px méretű képen is ugyanazokat a klasztereket találja meg mint a legnagyobb, 512px méretű képen. 
 
 \begin{figure}[h]
 \centering
@@ -173,7 +173,7 @@ A módszereknél a klaszterekre bontás idejét nem veszem figyelembe, csak mag�
 
 \SubSection{Silhouette módszer}
 
-A Silhouette index azt méri, hogy egy adott objektum mennyire hasonlít a saját klaszterében lévő objektumokhoz. Az értéke +1 és -1 között mozog. A nagyobb érték azt jelzi hogy az objektum jól illeszkedik a saját klaszteréhez és rosszul illeszkedik a szomszédos klaszterekhez. Ha a legtöbb objektumnak pozitív az értéke akkor a klaszterezés megfelelő, ha sok objektumnak negatív, akkor vagy túl sok, vagy túl kevés a klaszter.
+A Silhouette index azt méri, hogy egy adott objektum mennyire hasonlít a saját klaszterében lévő objektumokhoz. Az értéke +1 és -1 között mozog. A nagyobb érték azt jelzi, hogy az objektum jól illeszkedik a saját klaszteréhez és rosszul illeszkedik a szomszédos klaszterekhez. Ha a legtöbb objektumnak pozitív az értéke akkor a klaszterezés megfelelő, ha sok objektumnak negatív akkor vagy túl sok, vagy túl kevés a klaszter.
 
 A módszer a következő képlettel írható le:
 
@@ -209,7 +209,7 @@ def silhouette_method(values, labels):
 \end{python}
 Mint látható, a metódus visszatér a módszer számítási idejével, mivel a vizsgálataim során a futási idők összevetése volt az egyik fő szempont. Ezen kívül visszaadja a kiszámított Silhouette pontszámot is, amit az általam megadott értékekből és a hozzájuk tartozó címkékből állít elő. Ezeket az értékeket a \texttt{kmeans\_segmentation} metódus eredményeként kapom.
 
-A Silhouette módszer esetén azt tapasztaltam, hogy a futási ideje elég lassú. A \ref{fig:silhouette_runtime} ábrán látható a módszer futási ideje különböző méretű képekre.
+A Silhouette módszer esetén azt tapasztaltam, hogy a futási ideje elég lassú. A \ref{fig:silhouette_runtime}. ábrán látható a módszer futási ideje különböző méretű képekre.
 
 \begin{figure}[h]
 \centering
@@ -221,7 +221,7 @@ A Silhouette módszer esetén azt tapasztaltam, hogy a futási ideje elég lass�
 Jól látható, hogy míg a 128px méretű képre pár másodperc alatt elvégzi a számítást, az 512px méretű képre már nagyságrendileg 20 percig számol.
 
 \SubSection{Davies-Bouldin módszer}
-A Davies-Bouldin index a klaszteren belüli szóródás összegének és a klaszterek közötti szétválás arányának a függvénye. A célunk az, hogy ezt az értéket minimalizáljuk, hiszen azt szeretnénk hogy a klaszteren belüli szórás minimális, a klaszterek közötti elkülönülés pedig maximális legyen.
+A Davies-Bouldin index a klaszteren belüli szóródás összegének, és a klaszterek közötti szétválás arányának a függvénye. A célunk az hogy ezt az értéket minimalizáljuk, hiszen azt szeretnénk, hogy a klaszteren belüli szórás minimális, a klaszterek közötti elkülönülés pedig maximális legyen.
 
 A módszer képlete a következő:
 
@@ -304,13 +304,13 @@ def calinski_harabasz_method(values, labels):
 
 Az Elbow módszer a variancia százalékos arányát vizsgálja a klaszterek számának függvényében. Azon az elven alapszik, hogy olyan klaszterszámot kell választanunk amelyhez ha hozzáadnánk akár csak egy klasztert is, akkor a modellünk már nem javulna számottevő mértékben.
 
-Az első klaszterek sok információt adnak hozzá a modellhez, viszont egy bizonyos ponton a határnyereség drámaian lecsökken és szöget, vagyis könyököt képez a grafikonon (lásd. \ref{fig:elbow_example}. ábra). Innen ered az "elbow" azaz "könyök" módszer elnevezés. Az a pont ahol ez a drámai csökkenés bekövetkezik, az lesz a megfelelő klaszterszám. A \ref{fig:elbow_example}. ábrán ez a pont 2 klaszternél alakul ki, de érdemes lehet megvizsgálni a 3 klasztert is. \cite{elbow}
+Az első klaszterek sok információt adnak hozzá a modellhez, viszont egy bizonyos ponton a határnyereség drámaian lecsökken és szöget, vagyis könyököt képez a grafikonon (lásd. \ref{fig:elbow_grayscale}. ábra). Innen ered az "elbow" azaz "könyök" módszer elnevezés. Az a pont ahol ez a drámai csökkenés bekövetkezik, az lesz a megfelelő klaszterszám. A \ref{fig:elbow_grayscale}. ábrán ez a pont 2 klaszternél alakul ki, de érdemes lehet megvizsgálni a 3 klasztert is. \cite{elbow}
 
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.7]{images/elbow_example.png}
-\caption{Példa az Elbow módszerre.}
-\label{fig:elbow_example}
+\includegraphics[scale=0.7]{images/elbow_grayscale.png}
+\caption{Elbow módszer alkalmazása szürkeárnyalatos képre}
+\label{fig:elbow_grayscale}
 \end{figure}
 
 Az Elbow metódushoz a \texttt{kmeans\_segmentation} által eredményként visszaadott \texttt{compactness} értékeket szükséges lementenünk különböző méretű klaszterekre ahogy az a következő kódrészletben látható.
@@ -325,7 +325,7 @@ for k in range(1, 11):
     wcss.append(compactness)
 \end{python}
 
-Ha a \texttt{wcss} listát \texttt{plot} segítségével ábrázoljuk, meg is kaptuk az Elbow grafikonunkat pont úgy, mint ahogy a \ref{fig:elbow_example}. ábrán szerepel.
+Ha a \texttt{wcss} listát \texttt{plot} segítségével ábrázoljuk, meg is kaptuk az Elbow grafikonunkat pont úgy, mint ahogy a \ref{fig:elbow_grayscale}. ábrán szerepel.
 
 Ennél a módszernél külön számítást nem kell végeznünk, így futási ideje igazából csak maga a kirajzolás.
 
@@ -333,7 +333,7 @@ Ennél a módszernél külön számítást nem kell végeznünk, így futási id
 
 \SubSection{Összegzés}
 
-A módszerek vizsgálata során hamar kiderült, hogy a Silhouette módszer futási ideje számottevően nagyobb a többi módszerétől. Az eredmények összehasonlítását a \ref{tab:size_runtimes}. táblázat tartalmazza. Mivel az Elbow módszer nem egyértelmű és főként vizuális megerősítésként szolgál, így azt a módszert kihagytam a további elemzésekből.
+A módszerek vizsgálata során hamar kiderült, hogy a Silhouette módszer futási ideje számottevően nagyobb a többi módszerétől. Az eredmények összehasonlítását a \ref{tab:size_runtimes}. táblázat tartalmazza. Mivel az Elbow módszer nem egyértelmű és főként vizuális megerősítésként szolgál, így ezt a módszert kihagytam a további elemzésekből.
 
 \begin{table}[h]
 \centering
@@ -375,8 +375,54 @@ Calinski-Harabasz módszer & 0.0026s & 0.0024s & 0.0028s \\
 \end{tabular}
 \end{table}
 
-Természetesen a k-means metódus lassabban határozza meg a klasztereket nagyobb klaszterszám esetén így a nagyobb klaszterszám magának a programnak a futási idejét befolyásolja.
+Természetesen a K-means metódus lassabban határozza meg a klasztereket nagyobb klaszterszám esetén, így a nagyobb klaszterszám magának a programnak a futási idejét befolyásolja.
 
-A futási idők mellett a módszerek jóságát is megvizsgáltam mind színes, mind szürkeárnyalatos képek esetén.
+A futási idők mellett a módszerek jóságát is megvizsgáltam mind színes, mind szürkeárnyalatos képek esetén. Ennek a vizsgálatnak az eredményét a \ref{tab:cluster_result}. táblázatban foglaltam össze. 
 
-%TODO Jósági vizsgálat és dokumentálása 
+A módszereket minden képméretre több alkalommal is lefuttattam, ezekből a futások alkalmával kapott összes klaszterszámot megjelenítettem. Jól látható, hogy a Silhouette és a Davies-Bouldin módszer minden képméretre, minden futási alkalommal ugyanazt az eredményt szolgáltatta, és a két módszer eredményei megegyeznek.
+
+Ezzel szemben a Calinski-Harabasz módszer eredménye eltér a másik 2 módszer eredményétől, és a különböző képméretekre más-más klaszterszámmal szolgált. Emelett még az is látható hogy egy azon képméret esetén, például a 64px méretű színes képnél több futás alkalmával más-más klaszterszámot adott eredményül.
+
+\begin{table}[h]
+\centering
+\caption{Meghatározott klaszterszám különböző képméretek és módszerek esetén}
+\label{tab:cluster_result}
+\medskip
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\cline{2-7}
+ \multicolumn{1}{c|}{} & \multicolumn{6}{c|}{Kép mérete} \\
+ \hline
+ \multirow{2}{*}{Módszer} & \multicolumn{2}{c|}{64px} & \multicolumn{2}{c|}{126px} & \multicolumn{2}{c|}{256px} \\
+ \cline{2-7}
+ & Szürke & Színes & Szürke & Színes & Szürke & Színes  \\
+\hline
+Silhouette módszer & 2 & 3 & 2 & 3 & 2 & 3 \\
+Davies-Bouldin módszer & 2 & 3 & 2 & 3 & 2 & 3 \\
+Calinski-Harabasz módszer & 10 & 8,10 & 9,10 & 10 & 9 & 8,9 \\
+\hline
+\end{tabular}
+\end{table}
+
+Elvégeztem az Elbow módszert is a színes képre, ennek az eredménye a \ref{fig:elbow_rgb}. ábrán látható. A szürkeárnyalatos változatát a \ref{fig:elbow_grayscale}. ábra tartalmazza, ezt használtam fel példának az Elbow módszer bemutatásakor. Látható, hogy mind a két esetben a 2 és 3 klaszternél található meg törés a grafikonon, tehát az Elbow módszer is ezeket a klaszterszámokat javasolja.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.7]{images/elbow_rgb.png}
+\caption{Elbow módszer alkalmazása színes képre}
+\label{fig:elbow_rgb}
+\end{figure}
+
+A Módszerek által megadott klaszterszámokkal elvégeztem a klaszterezést, az eredmény a \ref{fig:kmeans_optimal_pictures}. ábrán látható.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.7]{images/kmeans_optimal_pictures.png}
+\caption{K-means klaszterezés a módszerek által megadott optimális klaszterszámmal}
+\label{fig:kmeans_optimal_pictures}
+\end{figure}
+
+Összegezve a vizsgálatokat ki lehet jelenteni, hogy a legjobb módszer az optimális klaszterszám meghatározására a vizsgáltak közül az a Davies-Bouldin módszer. 
+
+A Silhouette-módszer igaz hogy pontos, de a futási ideje nagyon magas. Ha egészen kis méretű képeket használunk akkor talán még alkalmazható, de nagyobb képek esetén nagyon megnöveli a program futási idejét. 
+
+A Calinski-Harabasz módszer futási ideje sok esetben jobb volt, mint a Davies-Bouldin módszeré, viszont a klaszterszám meghatározása nagyon pontatlan. Egyszer sem szolgáltatta azt az eredményt amit a másik három módszerből kaptam. 
