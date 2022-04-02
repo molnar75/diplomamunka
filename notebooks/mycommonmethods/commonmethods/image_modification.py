@@ -33,7 +33,7 @@ def resize_image(image, desired_height) :
     height = image.shape[0]
     # calculating the amount with I need to change the width
     scale_percent = height / desired_height
-    width = int(image.shape[0] / scale_percent)
+    width = int(image.shape[1] / scale_percent)
     dim = (width, desired_height)
     
     resized_image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
