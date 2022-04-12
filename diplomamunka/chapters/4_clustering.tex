@@ -108,11 +108,11 @@ Maga a \texttt{cv2.kmeans} a következő paramétereket várja \cite{kmeans_open
  A paramétereket úgy állítottam be hogy 10 alkalommal fusson le az algoritmus, és a klaszterek kezdő középpontját random határozza meg. Ezen kívül az algoritmus megáll ha eléri vagy a maximális iterációk számát ami 100, vagy a megfelelő pontosságot ami 0.2.
 
  Ezeket a paramétereket a \cite{kmeans_opencv} dokumentáció alapján határoztam meg, egyedül a pontosságot, az \texttt{epsilon} értékét állítottam kisebbre mint a dokumentációban szereplő érték.
- 
- Az algoritmus szegmentálási eredménye különböző számú klaszterekre a \ref{fig:kmenas_grayscale}. ábrán látható szürkeárnyalatos képek esetén, és a \ref{fig:kmenas_rgb}. ábrán látható színes képek esetén. Mind a két esetben 2, 4, és 8 értékeket állítottam be a klaszterek számának. 
- 
+
+ Az algoritmus szegmentálási eredménye különböző számú klaszterekre a \ref{fig:kmenas_grayscale}. ábrán látható szürkeárnyalatos képek esetén, és a \ref{fig:kmenas_rgb}. ábrán látható színes képek esetén. Mind a két esetben 2, 4, és 8 értékeket állítottam be a klaszterek számának.
+
  A szegementált képeket a \texttt{kmeans\_segmentation} által előállított \texttt{labels} és \texttt{centers} értékek segítségével rajzolom ki. Az egy kategóriába tartozó pixeleket kiszínezem a kategóriájuk középpontjával megegyező színnel a következő kódrészletben látható módon.
- 
+
 \begin{python}
 centers = np.uint8(centers)
 segmented_image = centers[labels.flatten()]
@@ -155,7 +155,7 @@ Jól látható, hogy a klaszterek számának növelésével a futási idő nem m
 
 A futási idők után megvizsgáltam, hogy vajon különböző méretű képekre mennyire pontos a klaszterezés. A klaszterek számának 4-et adtam meg, a klaszterezést pedig elvégeztem 64px, 128px, 256px és 512px méretű képekre. A futási eredményeket a \ref{fig:kmenas_picture_sizes}. ábra tartalmazza.
 
-Egyértelműen látszik, hogy már a legkisebb, 64px méretű képen is ugyanazokat a klasztereket találja meg mint a legnagyobb, 512px méretű képen. 
+Egyértelműen látszik, hogy már a legkisebb, 64px méretű képen is ugyanazokat a klasztereket találja meg mint a legnagyobb, 512px méretű képen.
 
 \begin{figure}[h]
 \centering
@@ -377,7 +377,7 @@ Calinski-Harabasz módszer & 0.0026s & 0.0024s & 0.0028s \\
 
 Természetesen a K-means metódus lassabban határozza meg a klasztereket nagyobb klaszterszám esetén, így a nagyobb klaszterszám magának a programnak a futási idejét befolyásolja.
 
-A futási idők mellett a módszerek jóságát is megvizsgáltam mind színes, mind szürkeárnyalatos képek esetén. Ennek a vizsgálatnak az eredményét a \ref{tab:cluster_result}. táblázatban foglaltam össze. 
+A futási idők mellett a módszerek jóságát is megvizsgáltam mind színes, mind szürkeárnyalatos képek esetén. Ennek a vizsgálatnak az eredményét a \ref{tab:cluster_result}. táblázatban foglaltam össze.
 
 A módszereket minden képméretre több alkalommal is lefuttattam, ezekből a futások alkalmával kapott összes klaszterszámot megjelenítettem. Jól látható, hogy a Silhouette és a Davies-Bouldin módszer minden képméretre, minden futási alkalommal ugyanazt az eredményt szolgáltatta, és a két módszer eredményei megegyeznek.
 
@@ -421,8 +421,8 @@ A Módszerek által megadott klaszterszámokkal elvégeztem a klaszterezést, az
 \label{fig:kmeans_optimal_pictures}
 \end{figure}
 
-Összegezve a vizsgálatokat ki lehet jelenteni, hogy a legjobb módszer az optimális klaszterszám meghatározására a vizsgáltak közül az a Davies-Bouldin módszer. 
+Összegezve a vizsgálatokat ki lehet jelenteni, hogy a legjobb módszer az optimális klaszterszám meghatározására a vizsgáltak közül az a Davies-Bouldin módszer.
 
-A Silhouette-módszer igaz hogy pontos, de a futási ideje nagyon magas. Ha egészen kis méretű képeket használunk akkor talán még alkalmazható, de nagyobb képek esetén nagyon megnöveli a program futási idejét. 
+A Silhouette-módszer igaz hogy pontos, de a futási ideje nagyon magas. Ha egészen kis méretű képeket használunk akkor talán még alkalmazható, de nagyobb képek esetén nagyon megnöveli a program futási idejét.
 
 A Calinski-Harabasz módszer futási ideje sok esetben jobb volt, mint a Davies-Bouldin módszeré, viszont a klaszterszám meghatározása nagyon pontatlan. Egyszer sem szolgáltatta azt az eredményt amit a másik három módszerből kaptam. 
