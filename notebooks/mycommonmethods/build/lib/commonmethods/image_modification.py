@@ -40,24 +40,19 @@ def resize_image(image, desired_height) :
     
     return resized_image
 
-def kmeans_segmentation(image, k):
+def kmeans_segmentation(values, k):
     """
-    Segmenting the image using opencv-python's k-means method 
-    :param image: the image that I want to carry out the segmentation
+    Segmenting the given values using opencv-python's k-means method 
+    :param values: the values at which I want to perform segmentation
     :param k: the number of the clusters
-    :return: the compactness, the pixel_values, the labels and the centers from the k-means method
+    :return: the compactness, the labels and the centers from the k-means method
     """
-    #check if the image is grayscale or rgb and reshape the pixels
-    if(len(image.shape)<3):
-        pixel_values = image.reshape((-1, 1))
-    else:
-        pixel_values = image.reshape((-1, 3))
-    
-    pixel_values = np.float32(pixel_values)
+    values = np.float32(values)
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
-    compactness, labels, (centers) = cv2.kmeans(pixel_values, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    
+    compactness, labels, (centers) = cv2.kmeans(values, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
     labels = labels.flatten()
     
-    return compactness, pixel_values, labels, (centers)
+    return compactness, labels, (centers)
