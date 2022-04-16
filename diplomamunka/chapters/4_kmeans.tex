@@ -1,4 +1,6 @@
-\Chapter{Klaszterezés}
+\Chapter{K-means klaszterezés}
+
+\Section{Klaszterezés}
 
 Ahhoz, hogy szürkeárnyalatos képeket megfelelően tudjunk kiszínezni, első lépésként meg kell határoznunk a kiszínezendő területeket. El kell döntenünk, hogy a kép mely részei tartoznak ugyan ahhoz a színárnyalathoz és melyek nem. Ezek alapján a dolgozat 2 fő részre bontható:
 \begin{itemize}
@@ -24,7 +26,7 @@ A klaszterezési algoritmusokat a következő módon tudjuk csoportosítani \cit
 
 A kutatások során az egyik legnépszerűbb particionáló klaszterezést használtam, a k-means klaszterezést.
 
-\Section{K-means klaszterezés}
+\Section{K-means módszer}
 A klaszterezés célja, hogy egy adathalmazt diszjunkt részhalmazokra (klaszterekre) ossza fel méghozzá úgy, hogy a klaszterezési kritérium optimális legyen. A legelterjedtebb klaszterezési kritérium az egyes adatpontok, és az azokat tartalmazó részhalmaz súlypontja (klaszterközéppont) közötti négyzetes Euklidészi távolságok összege. Ezt hívják klaszterezési hibának és ennek az optimalizálása a cél. \cite{kmeans}
 
 A K-means algoritmus lokálisan optimális megoldásokat talál, figyelembe véve a klaszterezési hibát. Ez egy gyors, iteratív módszer aminek az algoritmusa a következő \cite{tomatoleaf}:
@@ -47,27 +49,21 @@ Az optimális klaszterszám meghatározására több módszert is kipróbáltam,
 
 A kutatásom során a \texttt{opencv-python} könyvtárban található K-means metódust használtam. Mivel a szegmentálás ez egyik fő eleme a kutatásomnak, így ezt is kiszerveztem az általam készített \texttt{commonmethods} könyvtárba \texttt{kmeans\_segmentation} néven. A következő kódrészletben látható az általam megírt algoritmus.
 \begin{python}
-def kmeans_segmentation(image, k):
+def kmeans_segmentation(values, k):
     """
-    Segmenting the image using opencv-python's k-means method
-    :param image: the image that I want to carry out the segmentation
+    Segmenting the given values using opencv-python's k-means method
+    :param values: the values at which I want to perform segmentation
     :param k: the number of the clusters
-    :return: the compactness, the pixel_values, the labels and the
-        centers from the k-means method
+    :return: the compactness, the labels and 
+        the centers from the k-means method
     """
-    #check if the image is grayscale or rgb and reshape the pixels
-    if(len(image.shape)<3):
-        pixel_values = image.reshape((-1, 1))
-    else:
-        pixel_values = image.reshape((-1, 3))
-
-    pixel_values = np.float32(pixel_values)
+    values = np.float32(values)
 
     criteria = \
         (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
 
     compactness, labels, (centers) = cv2.kmeans(
-        pixel_values,
+        values,
         k,
         None,
         criteria,
@@ -76,10 +72,10 @@ def kmeans_segmentation(image, k):
 
     labels = labels.flatten()
 
-    return compactness, pixel_values, labels, (centers)
+    return compactness, labels, (centers)
 \end{python}
 
-Bemeneti paraméterként a képet és a klaszterek számát várja a metódus. Első lépésként átalakítom a kép pixeleit a \texttt{cv2.kemans} metódusnak megfelelő formátumra. Mivel a színes és a szürkeárnyalatos képek pixeleinek a dimenziója különböző, így először meg kell határoznom hogy milyen színterű képet kaptam, és ennek függvényében alakítom a pixeleket a megfelelő dimenziójú tömbbé.
+Bemeneti paraméterként a szegmentálni kívánt értékeket és a klaszterek számát várja a metódus. Első lépésként átalakítom a kapott értékeket a \texttt{cv2.kemans} metódusnak megfelelő formátumra.
 
 Maga a \texttt{cv2.kmeans} a következő paramétereket várja \cite{kmeans_opencv}:
 \begin{itemize}
@@ -105,13 +101,28 @@ Maga a \texttt{cv2.kmeans} a következő paramétereket várja \cite{kmeans_open
     \end{itemize}
 \end{itemize}
 
- A paramétereket úgy állítottam be hogy 10 alkalommal fusson le az algoritmus, és a klaszterek kezdő középpontját random határozza meg. Ezen kívül az algoritmus megáll ha eléri vagy a maximális iterációk számát ami 100, vagy a megfelelő pontosságot ami 0.2.
+A paramétereket úgy állítottam be hogy 10 alkalommal fusson le az algoritmus, és a klaszterek kezdő középpontját random határozza meg. Ezen kívül az algoritmus megáll ha eléri vagy a maximális iterációk számát ami 100, vagy a megfelelő pontosságot ami 0.2.
 
- Ezeket a paramétereket a \cite{kmeans_opencv} dokumentáció alapján határoztam meg, egyedül a pontosságot, az \texttt{epsilon} értékét állítottam kisebbre mint a dokumentációban szereplő érték.
+Ezeket a paramétereket a \cite{kmeans_opencv} dokumentáció alapján határoztam meg, egyedül a pontosságot, az \texttt{epsilon} értékét állítottam kisebbre mint a dokumentációban szereplő érték.
 
- Az algoritmus szegmentálási eredménye különböző számú klaszterekre a \ref{fig:kmenas_grayscale}. ábrán látható szürkeárnyalatos képek esetén, és a \ref{fig:kmenas_rgb}. ábrán látható színes képek esetén. Mind a két esetben 2, 4, és 8 értékeket állítottam be a klaszterek számának.
+A k-means módszert kétféleképpen teszteltem le. Először csak a kép intenzitását vettem figyelembe, és az összes képpontot átadtam az algoritmusnak szegmentálásra. Ezek után feature vektorokat hoztam létre azzal a szándékkal, hogy textúra alapján végezzem a szegmentálást. A vizsgálatok eredménye a következő fejezetekben található.
+ 
+\Section{Klaszterezés intenzitás alapján}
 
- A szegementált képeket a \texttt{kmeans\_segmentation} által előállított \texttt{labels} és \texttt{centers} értékek segítségével rajzolom ki. Az egy kategóriába tartozó pixeleket kiszínezem a kategóriájuk középpontjával megegyező színnel a következő kódrészletben látható módon.
+Az intenzitás alapú szegmentálás során nem volt másra szükségem, csak a kép pixeleinek az értékére. A szürkeárnyalatos kép pixeleit egy $nx1$ méretű, a színes képek pixeleit pedig egy $nx3$ méretű tömbbé alakítottam át. Erre a \texttt{numpy} csomagban található \texttt{reshape} metódust használtam a következő kódrészletben látható módon.
+\begin{python}
+#grayscale image
+grayscale_pixel_values = grayscale_image.reshape((-1, 1))
+
+#rgb image
+rgb_pixel_values = rgb_image.reshape((-1, 3))
+\end{python}
+
+A megkapott értékeket adtam át a \texttt{kmeans\_segmentation} metódusnak.
+
+A szegmentálás eredményei különböző számú klaszterekre a \ref{fig:kmenas_grayscale}. ábrán látható szürkeárnyalatos képek esetén, és a \ref{fig:kmenas_rgb}. ábrán látható színes képek esetén. Mind a két esetben 2, 4, és 8 értékeket állítottam be a klaszterek számának.
+
+A szegementált képeket a \texttt{kmeans\_segmentation} által előállított \texttt{labels} és \texttt{centers} értékek segítségével rajzolom ki. Az egy kategóriába tartozó pixeleket kiszínezem a kategóriájuk középpontjával megegyező színnel a következő kódrészletben látható módon.
 
 \begin{python}
 centers = np.uint8(centers)
@@ -163,6 +174,10 @@ Egyértelműen látszik, hogy már a legkisebb, 64px méretű képen is ugyanazo
 \caption{K-means módszer futási eredménye különböző méretű képekre}
 \label{fig:kmenas_picture_sizes}
 \end{figure}
+
+\Section{Klaszterezés textúra alapján/feature vektorral}
+
+\SubSection{Osztályozás/KNN}
 
 \Section{Optimális klaszterszám meghatározása} \label{optimal_cluster_number}
 
