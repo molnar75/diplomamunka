@@ -105,247 +105,10 @@ A paramétereket úgy állítottam be hogy 10 alkalommal fusson le az algoritmus
 
 Ezeket a paramétereket a \cite{kmeans_opencv} dokumentáció alapján határoztam meg, egyedül a pontosságot, az \texttt{epsilon} értékét állítottam kisebbre mint a dokumentációban szereplő érték.
 
-A k-means módszert kétféleképpen teszteltem le. Először csak a kép intenzitását vettem figyelembe, és az összes képpontot átadtam az algoritmusnak szegmentálásra. Ezek után feature vektorokat hoztam létre azzal a szándékkal, hogy textúra alapján végezzem a szegmentálást. A vizsgálatok eredménye a következő fejezetekben található.
-
-\Section{Klaszterezés intenzitás alapján}
-
-Az intenzitás alapú szegmentálás során nem volt másra szükségem, csak a kép pixeleinek az értékére. A szürkeárnyalatos kép pixeleit egy $n\times1$ méretű, a színes képek pixeleit pedig egy $n\times3$ méretű tömbbé alakítottam át. Erre a \texttt{numpy} csomagban található \texttt{reshape} metódust használtam a következő kódrészletben látható módon.
-\begin{python}
-#grayscale image
-grayscale_pixel_values = grayscale_image.reshape((-1, 1))
-
-#rgb image
-rgb_pixel_values = rgb_image.reshape((-1, 3))
-\end{python}
-
-A megkapott értékeket adtam át a \texttt{kmeans\_segmentation} metódusnak.
-
-A szegmentálás eredményei különböző számú klaszterekre a \ref{fig:kmenas_grayscale}. ábrán látható szürkeárnyalatos képek esetén, és a \ref{fig:kmenas_rgb}. ábrán látható színes képek esetén. Mind a két esetben 2, 4, és 8 értékeket állítottam be a klaszterek számának.
-
-A szegementált képeket a \texttt{kmeans\_segmentation} által előállított \texttt{labels} és \texttt{centers} értékek segítségével rajzolom ki. Az egy kategóriába tartozó pixeleket kiszínezem a kategóriájuk középpontjával megegyező színnel a következő kódrészletben látható módon.
-
-\begin{python}
-centers = np.uint8(centers)
-segmented_image = centers[labels.flatten()]
-segmented_image = segmented_image.reshape(image.shape)
-\end{python}
-
-Először a középpontok értékét \texttt{np.float32} típusról átalakítom integer típusra, majd a \texttt{labels} értékek alapján létrehozom a szegmentált kép pixeleit tartalmazó tömböt. Ez a tömb egy dimenziós lesz, így kirajzolás előtt átalakítom az eredeti képpel megegyező formátumra.
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.6]{images/kmeans_grayscale.png}
-\caption{K-means módszer futási eredménye szürkeárnyalatos kép esetén, különböző klaszterszámokra}
-\label{fig:kmenas_grayscale}
-\end{figure}
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.6]{images/kmeans_rgb.png}
-\caption{K-means módszer futási eredménye színes kép esetén, különböző klaszterszámokra}
-\label{fig:kmenas_rgb}
-\end{figure}
-
-A módszer vizsgálata során kitértem a futási időre is. Logikusan következik, hogy a képek méretének növelésével, vagy a klaszterek számának növelésével a módszer futási ideje is növekszik. A \ref{fig:kmenas_runtime_cluster}. és a \ref{fig:kmenas_runtime_size}. ábrákon található ezeknek a vizsgálatoknak az eredménye.
-
-Jól látható, hogy a klaszterek számának növelésével a futási idő nem minden alkalommal növekszik, viszont a képek méretének növelésével a futási idő növekedése folyamatos. Emellett az is megfigyelhető, hogy sem a legnagyobb vizsgált klaszterszám (10), sem a legnagyobb vizsgált képméret (768px) esetén nem éri el a futási idő a 0.5 másodpercet, tehát az algoritmus futási ideje még ezekben az esetekben is gyors.
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.7]{images/kmeans_runtime_cluster.png}
-\caption{K-means módszer futási ideje különböző klaszterszámokra}
-\label{fig:kmenas_runtime_cluster}
-\end{figure}
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.7]{images/kmeans_runtime_size.png}
-\caption{K-means módszer futási ideje különböző méretű képekre}
-\label{fig:kmenas_runtime_size}
-\end{figure}
-
-A futási idők után megvizsgáltam, hogy vajon különböző méretű képekre mennyire pontos a klaszterezés. A klaszterek számának 4-et adtam meg, a klaszterezést pedig elvégeztem 64px, 128px, 256px és 512px méretű képekre. A futási eredményeket a \ref{fig:kmenas_picture_sizes}. ábra tartalmazza.
-
-Egyértelműen látszik, hogy már a legkisebb, 64px méretű képen is ugyanazokat a klasztereket találja meg mint a legnagyobb, 512px méretű képen.
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.7]{images/kmeans_picture_sizes.png}
-\caption{K-means módszer futási eredménye különböző méretű képekre}
-\label{fig:kmenas_picture_sizes}
-\end{figure}
-
-\Section{Klaszterezés textúra alapján}
-
-Az intenzitás alapú klaszterezés során az objektumokat egymástól nem igazán lehetett megkülönböztetni, így másik módszert próbáltam alkalmazni. 
-
-A textúra alapú klaszterezés során úgynevezett feature vektorokat készítettem és ezeket adtam át a \texttt{kmeans\_segmentation} metódusomnak. A feature vektor egy $n\times px^2$ méretű tömb, ami $n$ darab az eredeti képből kivágott $px \times px$ méretű ablakot tartalmaz. Ezek az ablakok tartalmazzák a különböző textúrákat. A szegmentálás során a \texttt{k-means} módszer megpróbálja megtalálni az egymáshoz legjobban hasonlító ablakokat, vagyis textúrákat.
-
-Egy ablak kinyerését a következő kódrészletben látható \texttt{get\_window} metódus végzi el.
-\begin{python}
-import numpy as np
-
-def get_window(image, row_number, column_number, px):
-    """
-    Method for getting the px x px sized window from the image.
-    :param image: the image that I want to get the window from
-    :param row_number: the row where the window left corner pixel 
-        should start
-    :param column_number: the column where the window left corner pixel 
-        should start
-    :param px: the width and height of the window
-    :return: the px x px sized window from the image
-    """
-    window = np.zeros((px, px))
-
-    for i in range(0, px):
-        column = np.zeros((px))
-        for j in range(0, px):
-            column[j] = image[row_number+i][column_number+j]
-        window[i] = column
-
-    return window
-\end{python} 
-
-A függvény bemenetként a képet, az ablak méretét, és az ablak bal felső pixelének az $x, y$ koordinátáit várja \texttt{column\_number} és \texttt{row\_number} néven. 
-
-Első lépésként létrehozok egy $px \times px$ méretű tömböt amit feltöltök nullákkal, majd indítok két egymásba ágyazott for ciklust nullától $px$ méretéig. A külső ciklusban az oszlopokat hozom létre, majd a belső ciklussal végig haladok az oszlopban található pixelek értékein, és lementem őket. Az így kapott oszlopokat összefűzve megkapom a képemből kinyert ablakot.
-
-A függvény által meghatározott ablakokra példa a \ref{fig:window_example}. ábrán található. A \texttt{px} értékének 15-öt állítottam be, az ablakok kezdőértékei pedig a képek tetején szerepelnek. Az eredeti kép, az 5.jpg látható a bal felső ábrán. Az ablakok a képnek a különböző textúráit mutatják be, mindegyik textúra felett megtalálható annak az objektumnak a neve amiről származik. Megfigyelhető hogy amíg a háttér, az avokádó, és a terítő textúrája elég egyedi, addig a kancsó és a paprika textúrája nagyon hasonló egymáshoz. Az ő esetükben szükség lehet az ablakokon kívül más értékekre is (például az intenzitásukra), ami alapján a szegmentálás során meg lehet őket különböztetni.
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.6]{images/window_example.png}
-\caption{$15px\times 15px$ méretű minta ablakok a vizsgált képen található különböző textúrákról.}
-\label{fig:window_example}
-\end{figure}
-
-Ahhoz, hogy a teljes képet szegmentálni tudjam, szükségem van több ilyen $px \times px$ méretű ablakra. Hogy minél nagyobb valószínűséggel lefedjem a képen található összes textúrát, az ablakok helyzetét random határozom meg. Készítettem egy metódust \texttt{get\_window\_values} néven, ami a következő kódrészletben található.
-\begin{python}
-import numpy as np
-
-def get_window_values(image, window_quantity, px):
-    """
-    Method for getting random windows from the image, 
-    stacked in one vector.
-    The resulted vector size will be window_quantity x px*px.
-    :param image: the image that i want to get the random windows from
-    :param window_quantity: the amount of windows that i want to get
-    :param px: the width and height of the windows
-    :return: the result, which is the vector created from the windows, 
-        and the pixels, an array that contains the start pixels 
-        of the windows
-    """
-    height = image.shape[0]
-    width = image.shape[1]
-
-    pixels = np.zeros((window_quantity, 2))
-
-    #get random window start pixels
-    x = np.random.randint(0, height-px, window_quantity)
-    y = np.random.randint(0, width-px, window_quantity)
-
-    for i in range(window_quantity):
-        window = get_window(image, x[i], y[i], px)
-        window = window.reshape((1, -1))
-        pixels[i] = [x[i], y[i]] #saving the start pixels of the windows
-
-        if i == 0:
-            result = np.array(window)
-        else:
-            result = np.vstack([result, window])
-
-    return result, pixels
-\end{python}
-
-A függvény bemeneti paraméterként az ablakok számát és a méretét, ezen kívül azt a képet várja, amin az ablakokat szeretném meghatározni.
-
-Első lépésként létrehozok egy tömböt \texttt{pixels} néven, amiben az ablakok kezdeti pixeleit fogom eltárolni. Ezután a \texttt{numpy} csomag \texttt{random.randint} metódusa segítségével létrehozok \texttt{window\_quantity} mennyiségű, 0 és a kép mérete-px közötti integer számokat. 2 listát kapok, az egyikből kapom meg az $x$, a másikból az $y$ koordinátáit az ablakok kezdő pixeleinek. Egy for ciklus segítségével létrehozok \texttt{window\_quantity} darabszámú ablakot a fentebb említett \texttt{get\_window} függvény segítségével. A megkapott ablakokat átalakítom 1 dimenziós tömbbé, majd hozzáadom a result listához.
-
-Eredményül egy $\texttt{window\_quantity} \times px^2$ méretű tömböt kapok. Ez lesz az a feature vektor, amit átadok a \texttt{kmeans\_segmentation} metódusomnak szegmentálásra. 
-
-A szegmentálás eredményeként minden ablakra kapok egy label értéket. Annak érdekében hogy a pixeleket a megfelelő label szerint tudjam egyszerűen kiszínezni, készítettem egy \texttt{get\_label\_map} nevű metódust amit a következő kódrészlet tartalmaz.
-
-\begin{python}
-def get_label_map(height, width, pixels, labels, px):
-    """
-    Method for getting the label to each pixel of the windows.
-    :param height: the height of the image that contains the windows
-    :param width: the width of the image that contains the windows
-    :param pixels: the starting pixels of the previously 
-        calculated windows
-    :param px: the width and height of the windows
-    :return: an array in the shape of the image, 
-        the values are -1 where the pixel is not segmented,
-        the labels elswhere
-    """
-    label_map = np.full((height, width), -1)
-
-    for i in range(len(pixels)):
-        for j in range(0, px):
-            for k in range(0, px):
-                label_map[int(pixels[i][0]+j)][int(pixels[i][1]+k)] =\
-                    labels[i]
-
-    return label_map
-\end{python} 
-
-A függvény bemeneti paraméterként az eredeti kép méreteit, az ablakok méretét és kezdő pixeleit, ezen kívül a labeleket várja. Első lépésként létrehozok egy tömböt, ami ugyanolyan formájú mint maga a kép, és feltöltöm minden értékét -1-gyel. Ehhez a \texttt{numpy} csomag \texttt{full} függvényét használom. A -1 fogja jelezni, hogy egy pixel még nem kapott labelt. Ezután indítok egy for ciklust ami végig halad az ablakok kezdő pixelein. A kezdő értékektől indulva bejárom a $px \times px$ méretű ablakot, így megkapva az ablak összes pixelét, és minden pixelhez az ablakhoz kapott labelt rendelem hozzá. Eredményként kapok egy olyan térképet, ami a szegmentált pixelnél a labelt, a még nem szegmentált pixelnél pedig -1-et tartalmaz. 
-
-A megkapott szegmensek kirajzolása érdekében készítettem egy \texttt{color\_image} metódust ami a következő kódrészletben látható.
-
-\begin{python}
-import cv2
-import numpy as np
-
-def color_image(image, label_map):
-    """
-    Method for colorizing the image based on the label_map.
-    :param image: the image which I want to colorize
-    :param label_map: the map of the labels, I choose the color 
-        of the pixels by the label given to the pixel
-    :return: the colorized image
-    """
-    height = image.shape[0]
-    width = image.shape[1]
-
-    colored_image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-
-    colors = np.array([
-        [0, 0, 255],   #blue
-        [255, 0, 0],   #red
-        [255, 255, 0], #yellow
-        [0, 255, 0],   #lime
-        [0, 255, 255], #cyan
-        [255, 150, 0]  #orange
-    ])
-
-    for i in range(height):
-        for j in range(width):
-            if(label_map[i][j] != -1):
-                colored_image[i][j] = colors[label_map[i][j]]
-
-    return colored_image
-\end{python}
-
-A metódus bemeneti paraméterként azt a képet várja amit színezi szeretnénk, emellett a képpel megegyező formátumú label tömböt. Meghatározzuk a kép magasságát és szélességét, hogy for ciklussal végig tudjunk iterálni rajta. Ezután a \texttt{cv2} csomag \texttt{cvtColor} függvényével a paraméterként kapott képet átalakítom RGB formátumúra. Ez azt jelenti, hogy a pixelekhez tartozó eddigi 1 érték helyett hozzárendelünk egy 3 értékű tömböt, ami háromszor tartalmazza ugyanazt az értéket. Ettől kezdve színeket tudunk hozzárendelni a pixelekhez.
-
-Egy \texttt{colors} nevezetű tömbbe lementettem 6 szín RGB kódját. A pixel label értéke 0 és k között lehet, így a színeknél a maximális klaszterszám (jelen esetben) 6. Minden pixelt helyettesítek a \texttt{colors} listából a label értékével megegyező elemmel. Például ha a pixel label-je 0, akkor a colors[0]. elemét fogja megkapni. Ennek eredményeként az egy szegmensbe tartozó pixelek ugyanazt a színt fogják megkapni.
-
-Visszatérési értéke a függvénynek a színekkel ellátott kép. Ebben az esetben még árnyalatokat nem veszünk figyelembe, a színezés célja a szegmensek szemléltetése.
-
-A \ref{fig:window_colorized}. ábrán az eddig említett metódusok felhasználásával készített kép látható. A képhez beolvasás után 5000 darab, $15\times15$ px méretű ablakot generáltam a \texttt{get\_window\_values} függvénnyel, majd szegmentáltam a kapott értékeket $k=5$ paraméterrel a \texttt{kmeans\_segmentation} felhasználásával. Ezek után meghatároztam a label térképet a \texttt{get\_label\_map} függvénnyel, végül kiszíneztem a képet az imént említett \texttt{color\_image} metódussal.
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.6]{images/window_colorized.png}
-\caption{5000 darab, $15 \times 15$ px méretű ablak szegmentálása és megjelenítése az eredeti képen.}
-\label{fig:window_colorized}
-\end{figure}
-
-\SubSection{Osztályozás/KNN}
+A k-means módszert kétféleképpen teszteltem le. Először csak a kép intenzitását vettem figyelembe, és az összes képpontot átadtam az algoritmusnak szegmentálásra. Ezek után feature vektorokat hoztam létre azzal a szándékkal, hogy textúra alapján végezzem a szegmentálást. A vizsgálatok eredménye a \ref{kmeans_intensity}. illetve a \ref{kmeans_texture} fejezetekben található.
 
 \Section{Optimális klaszterszám meghatározása} \label{optimal_cluster_number}
+Mint már említettem, a K-menas módszer egyik legfontosabb mozzanat a K érték meghatározása. Ez a fejezet néhány módszert mutat be, amellyel ezt meg tudjuk tenni.
 
 Az optimális klaszterszám meghatározásához 4 módszert teszteltem le, ezeknek az eredménye a következő alfejezetekben található.
 A módszereket a \cite{tomatoleaf} és a \cite{elbow} kutatások alapján választottam.
@@ -606,4 +369,358 @@ A Módszerek által megadott klaszterszámokkal elvégeztem a klaszterezést, az
 
 A Silhouette-módszer igaz hogy pontos, de a futási ideje nagyon magas. Ha egészen kis méretű képeket használunk akkor talán még alkalmazható, de nagyobb képek esetén nagyon megnöveli a program futási idejét.
 
-A Calinski-Harabasz módszer futási ideje sok esetben jobb volt, mint a Davies-Bouldin módszeré, viszont a klaszterszám meghatározása nagyon pontatlan. Egyszer sem szolgáltatta azt az eredményt amit a másik három módszerből kaptam. 
+A Calinski-Harabasz módszer futási ideje sok esetben jobb volt, mint a Davies-Bouldin módszeré, viszont a klaszterszám meghatározása nagyon pontatlan. Egyszer sem szolgáltatta azt az eredményt amit a másik három módszerből kaptam.
+
+\Section{Klaszterezés intenzitás alapján} \label{kmeans_intensity}
+
+Az intenzitás alapú szegmentálás során nem volt másra szükségem, csak a kép pixeleinek az értékére. A szürkeárnyalatos kép pixeleit egy $n\times1$ méretű, a színes képek pixeleit pedig egy $n\times3$ méretű tömbbé alakítottam át. Erre a \texttt{numpy} csomagban található \texttt{reshape} metódust használtam a következő kódrészletben látható módon.
+\begin{python}
+#grayscale image
+grayscale_pixel_values = grayscale_image.reshape((-1, 1))
+
+#rgb image
+rgb_pixel_values = rgb_image.reshape((-1, 3))
+\end{python}
+
+A megkapott értékeket adtam át a \texttt{kmeans\_segmentation} metódusnak.
+
+A szegmentálás eredményei különböző számú klaszterekre a \ref{fig:kmenas_grayscale}. ábrán látható szürkeárnyalatos képek esetén, és a \ref{fig:kmenas_rgb}. ábrán látható színes képek esetén. Mind a két esetben 2, 4, és 8 értékeket állítottam be a klaszterek számának.
+
+A szegementált képeket a \texttt{kmeans\_segmentation} által előállított \texttt{labels} és \texttt{centers} értékek segítségével rajzolom ki. Az egy kategóriába tartozó pixeleket kiszínezem a kategóriájuk középpontjával megegyező színnel a következő kódrészletben látható módon.
+
+\begin{python}
+centers = np.uint8(centers)
+segmented_image = centers[labels.flatten()]
+segmented_image = segmented_image.reshape(image.shape)
+\end{python}
+
+Először a középpontok értékét \texttt{np.float32} típusról átalakítom integer típusra, majd a \texttt{labels} értékek alapján létrehozom a szegmentált kép pixeleit tartalmazó tömböt. Ez a tömb egy dimenziós lesz, így kirajzolás előtt átalakítom az eredeti képpel megegyező formátumra.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.6]{images/kmeans_grayscale.png}
+\caption{K-means módszer futási eredménye szürkeárnyalatos kép esetén, különböző klaszterszámokra}
+\label{fig:kmenas_grayscale}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.6]{images/kmeans_rgb.png}
+\caption{K-means módszer futási eredménye színes kép esetén, különböző klaszterszámokra}
+\label{fig:kmenas_rgb}
+\end{figure}
+
+A módszer vizsgálata során kitértem a futási időre is. Logikusan következik, hogy a képek méretének növelésével, vagy a klaszterek számának növelésével a módszer futási ideje is növekszik. A \ref{fig:kmenas_runtime_cluster}. és a \ref{fig:kmenas_runtime_size}. ábrákon található ezeknek a vizsgálatoknak az eredménye.
+
+Jól látható, hogy a klaszterek számának növelésével a futási idő nem minden alkalommal növekszik, viszont a képek méretének növelésével a futási idő növekedése folyamatos. Emellett az is megfigyelhető, hogy sem a legnagyobb vizsgált klaszterszám (10), sem a legnagyobb vizsgált képméret (768px) esetén nem éri el a futási idő a 0.5 másodpercet, tehát az algoritmus futási ideje még ezekben az esetekben is gyors.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.7]{images/kmeans_runtime_cluster.png}
+\caption{K-means módszer futási ideje különböző klaszterszámokra}
+\label{fig:kmenas_runtime_cluster}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.7]{images/kmeans_runtime_size.png}
+\caption{K-means módszer futási ideje különböző méretű képekre}
+\label{fig:kmenas_runtime_size}
+\end{figure}
+
+A futási idők után megvizsgáltam, hogy vajon különböző méretű képekre mennyire pontos a klaszterezés. A klaszterek számának 4-et adtam meg, a klaszterezést pedig elvégeztem 64px, 128px, 256px és 512px méretű képekre. A futási eredményeket a \ref{fig:kmenas_picture_sizes}. ábra tartalmazza.
+
+Egyértelműen látszik, hogy már a legkisebb, 64px méretű képen is ugyanazokat a klasztereket találja meg mint a legnagyobb, 512px méretű képen.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.7]{images/kmeans_picture_sizes.png}
+\caption{K-means módszer futási eredménye különböző méretű képekre}
+\label{fig:kmenas_picture_sizes}
+\end{figure}
+
+\Section{Klaszterezés textúra alapján} \label{kmeans_texture}
+
+Az intenzitás alapú klaszterezés során az objektumokat egymástól nem igazán lehetett megkülönböztetni, így másik módszert próbáltam alkalmazni.
+
+A textúra alapú klaszterezés során úgynevezett feature vektorokat készítettem és ezeket adtam át a \texttt{kmeans\_segmentation} metódusomnak. A feature vektor egy $n\times px^2$ méretű tömb, ami $n$ darab az eredeti képből kivágott $px \times px$ méretű ablakot tartalmaz. Ezek az ablakok tartalmazzák a különböző textúrákat. A szegmentálás során a K-means módszer megpróbálja megtalálni az egymáshoz legjobban hasonlító ablakokat, vagyis textúrákat.
+
+Egy ablak kinyerését a következő kódrészletben látható \texttt{get\_window} metódus végzi el.
+\begin{python}
+import numpy as np
+
+def get_window(image, row_number, column_number, px):
+    """
+    Method for getting the px x px sized window from the image.
+    :param image: the image that I want to get the window from
+    :param row_number: the row where the window left corner pixel
+        should start
+    :param column_number: the column where the window left corner pixel
+        should start
+    :param px: the width and height of the window
+    :return: the px x px sized window from the image
+    """
+    window = np.zeros((px, px))
+
+    for i in range(0, px):
+        column = np.zeros((px))
+        for j in range(0, px):
+            column[j] = image[row_number+i][column_number+j]
+        window[i] = column
+
+    return window
+\end{python}
+
+A függvény bemenetként a képet, az ablak méretét, és az ablak bal felső pixelének az $x, y$ koordinátáit várja \texttt{column\_number} és \texttt{row\_number} néven.
+
+Első lépésként létrehozok egy $px \times px$ méretű tömböt amit feltöltök nullákkal, majd indítok két egymásba ágyazott for ciklust nullától $px$ méretéig. A külső ciklusban az oszlopokat hozom létre, majd a belső ciklussal végig haladok az oszlopban található pixelek értékein, és lementem őket. Az így kapott oszlopokat összefűzve megkapom a képemből kinyert ablakot.
+
+A függvény által meghatározott ablakokra példa a \ref{fig:window_example}. ábrán található. A \texttt{px} értékének 15-öt állítottam be, az ablakok kezdőértékei pedig a képek tetején szerepelnek. Az eredeti kép, az 5.jpg látható a bal felső ábrán. Az ablakok a képnek a különböző textúráit mutatják be, mindegyik textúra felett megtalálható annak az objektumnak a neve amiről származik. Megfigyelhető hogy amíg a háttér, az avokádó, és a terítő textúrája elég egyedi, addig a kancsó és a paprika textúrája nagyon hasonló egymáshoz. Az ő esetükben szükség lehet az ablakokon kívül más értékekre is (például az intenzitásukra), ami alapján a szegmentálás során meg lehet őket különböztetni.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.6]{images/window_example.png}
+\caption{$15px\times 15px$ méretű minta ablakok a vizsgált képen található különböző textúrákról.}
+\label{fig:window_example}
+\end{figure}
+
+Ahhoz, hogy a teljes képet szegmentálni tudjam, szükségem van több ilyen $px \times px$ méretű ablakra. Hogy minél nagyobb valószínűséggel lefedjem a képen található összes textúrát, az ablakok helyzetét random határozom meg. Készítettem egy metódust \texttt{get\_window\_values} néven, ami a következő kódrészletben található.
+\begin{python}
+import numpy as np
+
+def get_window_values(image, window_quantity, px):
+    """
+    Method for getting random windows from the image,
+    stacked in one vector.
+    The resulted vector size will be window_quantity x px*px.
+    :param image: the image that i want to get the random windows from
+    :param window_quantity: the amount of windows that i want to get
+    :param px: the width and height of the windows
+    :return: the result, which is the vector created from the windows,
+        and the pixels, an array that contains the start pixels
+        of the windows
+    """
+    height = image.shape[0]
+    width = image.shape[1]
+
+    pixels = np.zeros((window_quantity, 2))
+
+    #get random window start pixels
+    x = np.random.randint(0, height-px, window_quantity)
+    y = np.random.randint(0, width-px, window_quantity)
+
+    for i in range(window_quantity):
+        window = get_window(image, x[i], y[i], px)
+        window = window.reshape((1, -1))
+        pixels[i] = [x[i], y[i]] #saving the start pixels of the windows
+
+        if i == 0:
+            result = np.array(window)
+        else:
+            result = np.vstack([result, window])
+
+    return result, pixels
+\end{python}
+
+A függvény bemeneti paraméterként az ablakok számát és a méretét, ezen kívül azt a képet várja, amin az ablakokat szeretném meghatározni.
+
+Első lépésként létrehozok egy tömböt \texttt{pixels} néven, amiben az ablakok kezdeti pixeleit fogom eltárolni. Ezután a \texttt{numpy} csomag \texttt{random.randint} metódusa segítségével létrehozok \texttt{window\_quantity} mennyiségű, 0 és a kép mérete-px közötti integer számokat. 2 listát kapok, az egyikből kapom meg az $x$, a másikból az $y$ koordinátáit az ablakok kezdő pixeleinek. Egy for ciklus segítségével létrehozok \texttt{window\_quantity} darabszámú ablakot a fentebb említett \texttt{get\_window} függvény segítségével. A megkapott ablakokat átalakítom 1 dimenziós tömbbé, majd hozzáadom a \texttt{result} listához.
+
+Eredményül egy $\texttt{window\_quantity} \times px^2$ méretű tömböt kapok. Ez lesz az a feature vektor, amit átadok a \texttt{kmeans\_segmentation} metódusomnak szegmentálásra.
+
+A szegmentálás eredményeként minden ablakra kapok egy címke értéket. Annak érdekében hogy a pixeleket a megfelelő címke szerint tudjam egyszerűen kiszínezni, készítettem egy \texttt{get\_label\_map} nevű metódust amit a következő kódrészlet tartalmaz.
+
+\begin{python}
+def get_label_map(height, width, pixels, labels, px):
+    """
+    Method for getting the label to each pixel of the windows.
+    :param height: the height of the image that contains the windows
+    :param width: the width of the image that contains the windows
+    :param pixels: the starting pixels of the previously
+        calculated windows
+    :param px: the width and height of the windows
+    :return: an array in the shape of the image,
+        the values are -1 where the pixel is not segmented,
+        the labels elswhere
+    """
+    label_map = np.full((height, width), -1)
+
+    for i in range(len(pixels)):
+        for j in range(0, px):
+            for k in range(0, px):
+                label_map[int(pixels[i][0]+j)][int(pixels[i][1]+k)] =\
+                    labels[i]
+
+    return label_map
+\end{python}
+
+A függvény bemeneti paraméterként az eredeti kép méreteit, az ablakok méretét és kezdő pixeleit, ezen kívül a címkéket várja. Első lépésként létrehozok egy tömböt, ami ugyanolyan formájú mint maga a kép, és feltöltöm minden értékét -1-gyel. Ehhez a \texttt{numpy} csomag \texttt{full} függvényét használom. A -1 fogja jelezni, hogy egy pixel még nem kapott címkét. Ezután indítok egy for ciklust ami végig halad az ablakok kezdő pixelein. A kezdő értékektől indulva bejárom a $px \times px$ méretű ablakot, így megkapva az ablak összes pixelét, és minden pixelhez az ablakhoz kapott címkét rendelem hozzá. Eredményként kapok egy olyan térképet, ami a szegmentált pixelnél a címkét, a még nem szegmentált pixelnél pedig -1-et tartalmaz.
+
+A megkapott szegmensek kirajzolása érdekében készítettem egy \texttt{color\_image} metódust ami a következő kódrészletben látható.
+
+\begin{python}
+import cv2
+import numpy as np
+
+def color_image(image, label_map):
+    """
+    Method for colorizing the image based on the label_map.
+    :param image: the image which I want to colorize
+    :param label_map: the map of the labels, I choose the color
+        of the pixels by the label given to the pixel
+    :return: the colorized image
+    """
+    height = image.shape[0]
+    width = image.shape[1]
+
+    colored_image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+
+    colors = np.array([
+        [0, 0, 255],   #blue
+        [255, 0, 0],   #red
+        [255, 255, 0], #yellow
+        [0, 255, 0],   #lime
+        [0, 255, 255], #cyan
+        [255, 150, 0]  #orange
+    ])
+
+    for i in range(height):
+        for j in range(width):
+            if(label_map[i][j] != -1):
+                colored_image[i][j] = colors[label_map[i][j]]
+
+    return colored_image
+\end{python}
+
+A metódus bemeneti paraméterként azt a képet várja amit színezi szeretnénk, emellett a képpel megegyező formátumú címke tömböt. Meghatározzuk a kép magasságát és szélességét, hogy for ciklussal végig tudjunk iterálni rajta. Ezután a \texttt{cv2} csomag \texttt{cvtColor} függvényével a paraméterként kapott képet átalakítom RGB formátumúra. Ez azt jelenti, hogy a pixelekhez tartozó eddigi 1 érték helyett hozzárendelünk egy 3 értékű tömböt, ami háromszor tartalmazza ugyanazt az értéket. Ettől kezdve színeket tudunk hozzárendelni a pixelekhez.
+
+Egy \texttt{colors} nevezetű tömbbe lementettem 6 szín RGB kódját. A pixel címke értéke 0 és k között lehet, így a színeknél a maximális klaszterszám (jelen esetben) 6. Minden pixelt helyettesítek a \texttt{colors} listából a címke értékével megegyező elemmel. Például ha a pixel címkéje 0, akkor a colors[0]. elemét fogja megkapni. Ennek eredményeként az egy szegmensbe tartozó pixelek ugyanazt a színt fogják megkapni.
+
+Visszatérési értéke a függvénynek a színekkel ellátott kép. Ebben az esetben még árnyalatokat nem veszünk figyelembe, a színezés célja a szegmensek szemléltetése.
+
+A \ref{fig:window_colorized}. ábrán az eddig említett metódusok felhasználásával készített kép látható. A képhez beolvasás után 5000 darab, $15\times15$ px méretű ablakot generáltam a \texttt{get\_window\_values} függvénnyel, majd szegmentáltam a kapott értékeket $k=5$ paraméterrel a \texttt{kmeans\_segmentation} felhasználásával. Ezek után meghatároztam a címke térképet a \texttt{get\_label\_map} függvénnyel, végül kiszíneztem a képet az imént említett \texttt{color\_image} metódussal.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.6]{images/window_colorized.png}
+\caption{5000 darab, $15 \times 15$ px méretű ablak szegmentálása és megjelenítése az eredeti képen.}
+\label{fig:window_colorized}
+\end{figure}
+
+Az ablakok szegmentálása után a kép többi részét is be kell osztanunk a kialakult szegmensekbe, ehhez valamilyen osztályozási módszerre van szükségünk.
+
+\SubSection{Osztályozás}
+
+Az osztályozási problémák célja azon jellemzők azonosítása amelyek jelzik, hogy az egyes esetek melyik csoportba tartoznak. A jellemzőkből álló minta felhasználható a meglévő adatok vizsgálatára és az új adatok viselkedésének előrejelzésére is. Az osztályozási modelleket már meglévő, osztályozott adatok vizsgálatával hozzák létre.
+
+Az egyik legegyszerűbb osztályozási módszer a K-Nearest Neighbor (KNN). A mintafelismerésben a KNN algoritmus a tulajdonságtérben található legközelebbi gyakorló példák alapján osztályozza az objektumokat. A KNN egyfajta példányalapú tanulás, vagy lusta tanulás, ahol a függvényt csak lokálisan közelítjük, és minden számítást elhalasztunk az osztályozásig. Ez a módszer megtartja a teljes tanítóhalmazt a tanulás során, és minden egyes lekérdezésnél veszi az új elemhez legközelebb levő K elemet, megvizsgálja az elemek osztályát és amelyik osztályból a legtöbb található a K elem között, az lesz az új objektum osztálya is.
+
+A KNN-osztályozó teljesítményét elsősorban a K értéke és az alkalmazott távolsági metrika határozza meg. Ha K nagyon kicsi, a lokális becslés az adatok ritkasága és a zajos, kétértelmű vagy rosszul címkézett pontok miatt általában nagyon gyenge lesz. A becslés további simítása érdekében növelhetjük K-t, és figyelembe vehetünk egy nagy régiót a lekérdezés körül. Sajnos a nagy K érték sem a legmegfelelőbb, mivel az osztályozási teljesítményt rontják a más osztályokból származó kiugró értékek. \cite{knn}
+
+Hasonlóan a K-means módszerhez, itt is az egyik legfontosabb lépés a megfelelő K érték meghatározása. Az ökölszabály az az, hogy a tanító halmaz elemszámának a gyökét adják meg a K értékének. Mivel ez nem feltétlen a legoptimálisabb érték, így én több K értéket is megvizsgálok, és a legjobb pontossággal rendelkezőt választom. A K meghatározására létrehoztam egy \texttt{determine\_K\_value} nevű függvényt ami a következő kódrészletben látható.
+\begin{python}
+import math
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+
+def determine_K_value(values, labels):
+    """
+    Method for determining the best K value for KNN method.
+    :param values: the values that I want to use to teach the modell
+    :param labels: the labels to the values
+    :return: the best K value, the training values and labels 
+        for teaching the model
+    """
+    values_train, values_test, labels_train, labels_test =\
+        train_test_split(
+            values,
+            labels,
+            stratify = labels,
+            train_size = 0.8)
+
+    root =  int(math.sqrt(values_train.shape[0]))
+
+    neighbors = np.arange(root-10, root+10)
+
+    train_accuracy = np.empty(len(neighbors))
+    test_accuracy = np.empty(len(neighbors))
+
+    for i, k in enumerate(neighbors):
+        knn_model = KNeighborsClassifier(n_neighbors=k)
+        knn_model.fit(values_train, labels_train)
+
+        train_accuracy[i] = knn_model.score(values_train, labels_train)
+        test_accuracy[i] = knn_model.score(values_test, labels_test)
+
+    max_train = max(train_accuracy)
+    max_train_k =\
+        neighbors[np.where(train_accuracy == max(train_accuracy))]
+    max_test = max(train_accuracy)
+    max_test_k =\
+        neighbors[np.where(test_accuracy == max(test_accuracy))]
+
+    chosen_k = -1
+    if(len(max_test_k) > 1):
+        for k in max_test_k:
+            if(k in max_train_k):
+                chosen_k = k
+                break
+    else:
+        chosen_k = max_test_k[0]
+
+    if(chosen_k == -1):
+        chosen_k = np.random.choice(max_test_k)
+
+    return chosen_k, values_train, labels_train
+\end{python}
+
+A modellem létrehozására és az adathalmazom formálásra a \texttt{sklearn} könyvtárban található függvényeket használom. A modellem betanításához szükségem van egy, már szegmentált mintahalmazra, így első lépésként meghatározok ablakokat amiket átadok a \texttt{kmeans\_segmentation} metódusnak. Az értékeket, és a kapott címkéket adom át a \texttt{determine\_K\_value} függvénynek, ami \texttt{values} illetve \texttt{labels} paraméterként várja őket.
+
+Szeretném tesztelni a modell hatékonyságát, így első lépésként fel kell osztanom az adathalmazomat tanító és tesztelő részhalmazokra. 
+
+A felbontáshoz a \texttt{sklearn.model\_selection} csomagból a \texttt{train\_test\_split} függvényt használom. A halmazt 80\%-20\% arányban osztom fel tanító és teszt részhalmazra, ezen kívül megadom, hogy a felbontás során ugyanannyi százalékban tartalmazzon mind a két halmaz elemeket az egyes címkékből.
+
+Az adatok szétválasztása után létrehozom azt a listát, ami a lehetséges K elemeket fogja tartalmazni. Ehhez meghatározom a tanító halmazom elemszámának gyökét, és ehhez mérten a tőle $\pm 10$ intervallumban levő értékeket vizsgálom.
+
+Ezután egy for ciklussal végig iterálok a meghatározott K értékeken. A cikluson belül létrehozom a modellemet a \texttt{sklearn.neighbors} csomag \texttt{KNeighborsClassifier} függvényével az éppen vizsgált K érték megadásával. A modell definiálása után a tanító adatokkal betanítom, majd a teszt adatokkal megvizsgálom a modell pontosságát. Mint látható, két már előre definiált tömbbe lementem a különböző K értékek tesztelési pontosságát a modell \texttt{score} függvényének a segítségével. A kapott pontossági értékeket grafikonon szemléletesen lehet ábrázolni, erre példa a \ref{fig:knn_accuracy}. ábrán látható. Megfigyelhető, hogy a modell pontossága 95\% felett található minden K értékre.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.6]{images/knn_accuracy.png}
+\caption{KNN modell pontosságát szemléltető grafikon.}
+\label{fig:knn_accuracy}
+\end{figure}
+
+Mivel több érték is előfordulhat ami a teszt halmazra maximum pontosságot eredményez, így a megfelelő K értékét a tanító halmaz legjobb eredményeinek a figyelembevételével határozom meg. Amennyiben több a teszt halmazban található elem is elérte a maximum pontosságot, akkor megvizsgálom, hogy a tanító halmazban is maximális pontosságot ért-e el az adott K érték. Ha igen, akkor az első ilyen esetnél megállok és az lesz a választott K. Ha nincs ilyen, akkor random választok a legjobb teszt halmaz eredményeiből. Természetesen ha csak 1 K érték érte el a maximális pontosságot a teszt halmazon, akkor az lesz a választott K érték.
+
+A \ref{fig:knn_accuracy}. ábra esetében a választott K érték a 18 lenne, mivel a teszt és tanító halmaz pontossága is maximális az adott helyen. Ez fenn áll a K=20 helyen is, viszont az algoritmusom az első találatnál megáll, hiszen mind a kettő K érték ugyan olyan eredményt produkál.
+
+Miután meghatároztuk a K megfelelő értékét létre kell hoznunk a modellt, ami ezt az értéket kapja meg paraméterként. A modell betanítása után a képen található még címke nélküli pixelek osztályozása következik. Ezt az osztályozást 2 módon végeztem el:
+\begin{enumerate}
+\item \label{method_window} A képen végig iterálok és megviszgálom, hogy az adott pixel rendelkezik-e címkével. Ha igen, tovább haladok, ha nem, akkor készítek egy ablakot a pixeltől indulva, majd ezt az ablakot osztályozom, és frissítem a címke térképet az összes ablakban található pixelre.
+\item \label{method_pixel} A képen végig iterálok és megviszgálom, hogy az adott pixel rendelkezik-e címkével. Ha igen, tovább haladok, ha nem, akkor nem ablakot készítek, hanem magát a pixelt osztályozom és mentem le.
+\end{enumerate}
+
+A két módszer esetén a fő különbség az az, hogy milyen adatokkal tanítom be a modellemet. 
+
+Az \ref{method_window}. módszer esetén egyszerűen a már meglévő feature vektort adom át a modellnek. Minden olyan pixelnél ami még nem kapott címkét, a \texttt{get\_window} függvénnyel készítek egy ablakot, majd a KNN modell \texttt{predict} metódusával meghatározom a hozzá tartozó címkét. Ezután a címke térkép frissítése szükséges, amihez végig kell iterálnom az ablak pixelein, és minden pixelhez beállítom a KNN által meghatározott címke értékét.
+
+A \ref{method_pixel}. módszer esetén a betanítást nem ablakokra, hanem pixelekre kell elvégezni. Ehhez a meglévő érték listát egyszerűen átalakítom 1 dimenziós tömbbé a már korábban használt \texttt{reshape} metódussal. A címke listát is szükséges átalakítani, hiszen az eredeti lista csak ablakonként tartalmazta a címkéket, most pedig pixelenként van rájuk szükség. Ehhez végig haladok minden ablakon, és minden pixeléhez lementem a címkéket. A modell betanítása után a kép minden pixelén végig haladok, és minden egyes pixelre meghívom a \texttt{predict} metódust. 
+
+Miután a módszerekkel meghatározom a címkéket, a \texttt{color\_image} függvénnyel kiszínezem a különböző szegmenseket. A módszerekkel szegmentált képekre példa a \ref{fig:window_pixel_segmentation}. ábrán látható.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{images/window_pixel_segmentation.png}
+\caption{Szegmentálás az \ref{method_window}. a illetve \ref{method_pixel}. módszerekkel.}
+\label{fig:window_pixel_segmentation}
+\end{figure}
+
+Az \ref{method_window}. módszer egy olyan képet eredményez, ahol nincsenek lekerekített szélek, hanem átlógnak az ablakok egyik objektumból a másikba. A kép jobb szélén és az alján láthatóak szegmentálatlan részek, hiszen ha a címke nélküli pixel közelebb található a kép széléhez mint az ablak szélessége, akkor már nem tudunk ablakot készíteni hozzá, így nem is vizsgáljuk meg azokat a pontokat. Ezt a hibát ki lehetne úgy javítani, hogy külön ciklussal a címke nélküli pixeleket osztályozom ezeken a területeken. Mivel ehhez külön modellt kellene betanítani ami nem az ablakokat, hanem a pixeleket osztályozza, így ezzel ennél a módszernél nem foglalkoztam, hiszem a másik módszer pontosan ezt csinálja. 
+
+Az eddigiekkel szemben a \ref{method_pixel}. módszer szegmentálása sokkal pontosabb, jobban elkülöníti az egymástól különböző szegmenseket. Itt nincsenek szegmentálatlan részek, minden pixel tartozik valahova. A képen megfigyelhetők a négyzet alakú ablakok. Ezeket el lehetne tüntetni, ha az osztályozás során felülbírálnánk a \texttt{kmeans\_segmentation} által kapott címkéjüket. 
+
+Az tisztán látható, hogy mind a két módszer ugyanazokat a szegmenseket eredményezi. A futási idejüket tekintve amíg az \ref{method_window}. módszer pár másodperc alatt lefut, addig a \ref{method_pixel}. módszernek átlagban 10 perc szükséges a futásához.
+
+Mivel a kép szegmentálása megtörtént, így már csak a tényleges kiszínezése van hátra, amivel a következő fejezetben foglalkozok.
