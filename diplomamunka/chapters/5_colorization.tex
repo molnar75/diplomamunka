@@ -68,3 +68,40 @@ A szorzások után már csak össze kell olvasztanom a 3 különálló tömböt.
 Itt már szépen megjelennek az árnyékok, jól kivehetőek a színátmenetek. 
 
 \Section{HSV}
+
+A HSV színtér szintén széles körben használt, az emberi szem számára megfelelőbb színtér. A HSV színtérben minden pixelt a következő 3 paraméter határoz meg:
+\begin{itemize}
+\item színárnyalat (Hue)
+\item telítettség (Saturation)
+\item érték (Value)
+\end{itemize}
+
+A színárnyalat (H) az alapszínt jelöli vagy fokban, vagy számokban. A színek skáláját az \ref{tab:hsv_colors}. táblázat szemlélteti. 
+
+\begin{table}[h]
+\centering
+\caption{HSV színtér színárnyalatainak az értéke.}
+\label{tab:hsv_colors}
+\medskip
+\begin{tabular}{|c|c|c|}
+\hline
+Érték fokban & Érték számmal & Értékhez tartozó szín \\
+\hline
+0$^{\circ}$ vagy 360$^{\circ}$ & 0 vagy 6 & Vörös \\
+\hline
+60$^{\circ}$ & 1 & Sárga \\
+\hline
+120$^{\circ}$ & 2 & Zöld \\
+\hline
+180$^{\circ}$ & 3 & Cián \\
+\hline
+240$^{\circ}$ & 4 & Kék \\
+\hline
+300$^{\circ}$ & 5 & Magenta \\
+\hline
+\end{tabular}
+\end{table}
+
+A telítettség (S) azt írja le, hogy a szín milyen mennyiségben tartalmazza a fehér színt. A telítettséget mindig százalékos értékben adjuk meg, a 100\% jelenti a teljesen telített színt. Minél kisebb az értéke, annál halványabb a szín, mivel egyre több szürkét tartalmaz.
+
+Az értéket (V) szokták fényerőnek (Brightness) is hívni, olyankor a színteret HSB színtérként emlegetik, de ez megegyezik a HSV színtérrel. A szín sötétségét fejezi ki százalékos arányban, ahol a 0\% a fekete, a 100\% a fehér színt jelenti. \cite{colorspaces}
