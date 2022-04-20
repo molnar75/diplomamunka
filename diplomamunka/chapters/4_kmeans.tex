@@ -629,7 +629,7 @@ def determine_K_value(values, labels):
     Method for determining the best K value for KNN method.
     :param values: the values that I want to use to teach the modell
     :param labels: the labels to the values
-    :return: the best K value, the training values and labels 
+    :return: the best K value, the training values and labels
         for teaching the model
     """
     values_train, values_test, labels_train, labels_test =\
@@ -677,7 +677,7 @@ def determine_K_value(values, labels):
 
 A modellem létrehozására és az adathalmazom formálásra a \texttt{sklearn} könyvtárban található függvényeket használom. A modellem betanításához szükségem van egy, már szegmentált mintahalmazra, így első lépésként meghatározok ablakokat amiket átadok a \texttt{kmeans\_segmentation} metódusnak. Az értékeket, és a kapott címkéket adom át a \texttt{determine\_K\_value} függvénynek, ami \texttt{values} illetve \texttt{labels} paraméterként várja őket.
 
-Szeretném tesztelni a modell hatékonyságát, így első lépésként fel kell osztanom az adathalmazomat tanító és tesztelő részhalmazokra. 
+Szeretném tesztelni a modell hatékonyságát, így első lépésként fel kell osztanom az adathalmazomat tanító és tesztelő részhalmazokra.
 
 A felbontáshoz a \texttt{sklearn.model\_selection} csomagból a \texttt{train\_test\_split} függvényt használom. A halmazt 80\%-20\% arányban osztom fel tanító és teszt részhalmazra, ezen kívül megadom, hogy a felbontás során ugyanannyi százalékban tartalmazzon mind a két halmaz elemeket az egyes címkékből.
 
@@ -702,11 +702,11 @@ Miután meghatároztuk a K megfelelő értékét létre kell hoznunk a modellt, 
 \item \label{method_pixel} A képen végig iterálok és megviszgálom, hogy az adott pixel rendelkezik-e címkével. Ha igen, tovább haladok, ha nem, akkor nem ablakot készítek, hanem magát a pixelt osztályozom és mentem le.
 \end{enumerate}
 
-A két módszer esetén a fő különbség az az, hogy milyen adatokkal tanítom be a modellemet. 
+A két módszer esetén a fő különbség az az, hogy milyen adatokkal tanítom be a modellemet.
 
 Az \ref{method_window}. módszer esetén egyszerűen a már meglévő feature vektort adom át a modellnek. Minden olyan pixelnél ami még nem kapott címkét, a \texttt{get\_window} függvénnyel készítek egy ablakot, majd a KNN modell \texttt{predict} metódusával meghatározom a hozzá tartozó címkét. Ezután a címke térkép frissítése szükséges, amihez végig kell iterálnom az ablak pixelein, és minden pixelhez beállítom a KNN által meghatározott címke értékét.
 
-A \ref{method_pixel}. módszer esetén a betanítást nem ablakokra, hanem pixelekre kell elvégezni. Ehhez a meglévő érték listát egyszerűen átalakítom 1 dimenziós tömbbé a már korábban használt \texttt{reshape} metódussal. A címke listát is szükséges átalakítani, hiszen az eredeti lista csak ablakonként tartalmazta a címkéket, most pedig pixelenként van rájuk szükség. Ehhez végig haladok minden ablakon, és minden pixeléhez lementem a címkéket. A modell betanítása után a kép minden pixelén végig haladok, és minden egyes pixelre meghívom a \texttt{predict} metódust. 
+A \ref{method_pixel}. módszer esetén a betanítást nem ablakokra, hanem pixelekre kell elvégezni. Ehhez a meglévő érték listát egyszerűen átalakítom 1 dimenziós tömbbé a már korábban használt \texttt{reshape} metódussal. A címke listát is szükséges átalakítani, hiszen az eredeti lista csak ablakonként tartalmazta a címkéket, most pedig pixelenként van rájuk szükség. Ehhez végig haladok minden ablakon, és minden pixeléhez lementem a címkéket. A modell betanítása után a kép minden pixelén végig haladok, és minden egyes pixelre meghívom a \texttt{predict} metódust.
 
 Miután a módszerekkel meghatározom a címkéket, a \texttt{color\_image} függvénnyel kiszínezem a különböző szegmenseket. A módszerekkel szegmentált képekre példa a \ref{fig:window_pixel_segmentation}. ábrán látható.
 
@@ -717,10 +717,10 @@ Miután a módszerekkel meghatározom a címkéket, a \texttt{color\_image} füg
 \label{fig:window_pixel_segmentation}
 \end{figure}
 
-Az \ref{method_window}. módszer egy olyan képet eredményez, ahol nincsenek lekerekített szélek, hanem átlógnak az ablakok egyik objektumból a másikba. A kép jobb szélén és az alján láthatóak szegmentálatlan részek, hiszen ha a címke nélküli pixel közelebb található a kép széléhez mint az ablak szélessége, akkor már nem tudunk ablakot készíteni hozzá, így nem is vizsgáljuk meg azokat a pontokat. Ezt a hibát ki lehetne úgy javítani, hogy külön ciklussal a címke nélküli pixeleket osztályozom ezeken a területeken. Mivel ehhez külön modellt kellene betanítani ami nem az ablakokat, hanem a pixeleket osztályozza, így ezzel ennél a módszernél nem foglalkoztam, hiszem a másik módszer pontosan ezt csinálja. 
+Az \ref{method_window}. módszer egy olyan képet eredményez, ahol nincsenek lekerekített szélek, hanem átlógnak az ablakok egyik objektumból a másikba. A kép jobb szélén és az alján láthatóak szegmentálatlan részek, hiszen ha a címke nélküli pixel közelebb található a kép széléhez mint az ablak szélessége, akkor már nem tudunk ablakot készíteni hozzá, így nem is vizsgáljuk meg azokat a pontokat. Ezt a hibát ki lehetne úgy javítani, hogy külön ciklussal a címke nélküli pixeleket osztályozom ezeken a területeken. Ehhez a másik módszerben betanított modellt lehetne felhasználni.
 
-Az eddigiekkel szemben a \ref{method_pixel}. módszer szegmentálása sokkal pontosabb, jobban elkülöníti az egymástól különböző szegmenseket. Itt nincsenek szegmentálatlan részek, minden pixel tartozik valahova. A képen megfigyelhetők a négyzet alakú ablakok. Ezeket el lehetne tüntetni, ha az osztályozás során felülbírálnánk a \texttt{kmeans\_segmentation} által kapott címkéjüket. 
+Az eddigiekkel szemben a \ref{method_pixel}. módszer szegmentálása sokkal pontosabb, jobban elkülöníti az egymástól különböző szegmenseket. Itt nincsenek szegmentálatlan részek, minden pixel tartozik valahova.
 
-Az tisztán látható, hogy mind a két módszer ugyanazokat a szegmenseket eredményezi. A futási idejüket tekintve amíg az \ref{method_window}. módszer pár másodperc alatt lefut, addig a \ref{method_pixel}. módszernek átlagban 10 perc szükséges a futásához.
+Az tisztán látható, hogy mind a két módszer ugyanazokat a szegmenseket eredményezi. A futási idejüket tekintve amíg az \ref{method_window}. módszer pár másodperc alatt lefut, addig a \ref{method_pixel}. módszernek átlagban 14 perc szükséges a futásához.
 
-Mivel a kép szegmentálása megtörtént, így már csak a tényleges kiszínezése van hátra, amivel a következő fejezetben foglalkozok.
+Mivel a kép szegmentálása megtörtént, így már csak a tényleges kiszínezése van hátra, amivel a következő fejezetben foglalkozok. 
