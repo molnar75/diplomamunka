@@ -56,7 +56,7 @@ A művelet kimeneti értékének ugyanazt a tömböt adom meg. A szorzásnak meg
 
 Utolsó paraméterként a \texttt{casting} paraméternek unsafe értéket állítok be, ez azt jelenti, hogy a nem egyforma típusú értékek esetén is elvégzi a szorzást a függvény.
 
-A szorzások után már csak össze kell olvasztanom a 3 különálló tömböt. Ez a \texttt{cv2.merge} függvénnyel egyszerűen megtudom valósítani. A színezésre példa az \ref{fig:colorized_rgb}.ábrán látható.
+A szorzások után már csak össze kell olvasztanom a 3 különálló tömböt. Ez a \texttt{cv2.merge} függvénnyel egyszerűen megtudom valósítani. A színezésre példa a \ref{fig:colorized_rgb}.ábrán látható.
 
 \begin{figure}[h]
 \centering
@@ -76,7 +76,7 @@ A HSV színtér szintén széles körben használt, az emberi szem számára meg
 \item érték (Value)
 \end{itemize}
 
-A színárnyalat (H) az alapszínt jelöli vagy fokban, vagy számokban. A színek skáláját az \ref{tab:hsv_colors}. táblázat szemlélteti.
+A színárnyalat (H) az alapszínt jelöli vagy fokban, vagy számokban. A színek skáláját a \ref{tab:hsv_colors}. táblázat szemlélteti.
 
 \begin{table}[h]
 \centering
@@ -106,3 +106,58 @@ A telítettség (S) azt írja le, hogy a szín milyen mennyiségben tartalmazza 
 
 Az értéket (V) szokták fényerőnek (Brightness) is hívni, olyankor a színteret HSB színtérként emlegetik, de ez megegyezik a HSV színtérrel. A az érték a szín sötétségét fejezi ki százalékos arányban, ahol a 0\% a fekete, a 100\% a fehér színt jelenti. \cite{colorspaces}
 
+A HSV színtérben található szürkeárnyalatos képek a H és S csatornákon 0 értékeket tartalmaznak, a kép csak a V értékeiből áll. Ahhoz, hogy szürkeárnyalatosból színes képet tudjunk készíteni, szükségünk van mind a H és mind az S csatorna értékeire. A \ref{fig:hsv_colorization}. ábra szemlélteti a színezés megvalósításának lehetőségeit. 
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{images/hsv_colorization.png}
+\caption{Kép színének visszabecslése HSV színtérben.}
+\label{fig:hsv_colorization}
+\end{figure}
+
+Az ábra abból indul ki hogy van egy RGB színterű képünk, ezt átalakítjuk HSV színterűvé. Ha csatornáira bontjuk a képet, akkor a V  jelzi nekünk a szürkeárnyalatos képet. Amennyiben ismerjük az eredeti H és S csatornákat, akkor jól látható, hogy az eredeti képet fogjuk visszakapni. Amennyiben csak a H értékeit ismerjük, abban az esetben az $RGB^{(1)}$ kép elég hasonló, de színerősségben nagy valószínűséggel különböző lesz. Ezek azok az esetek, amikor valahonnan visszakapjuk ezeket az értékeket, például ha egyébként megvan az eredeti RGB kép és onnan meghatározzuk őket.
+
+Amennyiben csak egy szürkeárnyalatos képünk van, abban az esetben ezeket a csatornákat valahogyan meg kell becsülnünk. Az ábrán a szaggatott vonal jelképezi a becslést, a becsült csatornákat pedig H' és S' jelöli. 
+
+Amennyiben a H csatornát tudjuk csak megbecsülni, abban az esetben az S értékének valamilyen átlagértéket veszünk. A kapott $RGB^{(2)}$ képünk nagyban el fog térni az eredeti képtől, hiszen a színek sem biztos hogy pontosak, az árnyalatuk pedig csak egy meghatározott átlag érték, tehát ha az eredeti kép nagyon erős színeket tartalmaz vagy nagyon halvány színeket, akkor az eredmény képünk nagyon eltérő lesz tőle.
+
+Amennyiben viszont az S értékét is vissza tudjuk becsülni, abban az esetben az $RGB^{(3)}$ valószínűleg annyira pontos nem lesz, mintha meglenne az eredeti H és S csatorna, viszont pontosabb lesz mint az $RGB^{(1)}$ illetve az $RGB^{(2)}$.
+
+A \texttt{colors} tömb felhasználásával egyszerűen ki lehet színezni egy szürkeárnyalatos HSV színterű képet. Az RGB színeket átalakítva HSV színterű színekké megkapjuk a H, illetve az S értékét is a színnek. Ezután már csak annyi dolgunk van, hogy ezeket az értékeket átadjuk az összes pixelnek. Egy ilyen színezés megvalósításának a kódja látható a következő kódrészletben. 
+\begin{python}
+import colorsys
+
+colored_image_rgb = cv2.cvtColor(resized_image, cv2.COLOR_GRAY2RGB)
+
+hsv_image = cv2.cvtColor(colored_image_rgb, cv2.COLOR_RGB2HSV)
+
+colored_hsv = hsv_image
+
+for label in range(k):
+    color_hsv = colorsys.rgb_to_hsv(
+        colors[label][0]/255,
+        colors[label][1]/255,
+        colors[label][2]/255)
+    for i in range(1024):
+        for j in range(1024):
+            if(label_map[i][j] == label):
+                colored_hsv[i][j] =\
+                [color_hsv[0]*180, color_hsv[1]*255, hsv_image[i][j][2]]
+\end{python} 
+
+A színek konvertálására a \texttt{colorsys} csomagot használom, abból is az \texttt{rgb\_to\_hsv} függvényt, ami bemenetként az RGB szín csatornáit várja 0 és 1 közötti értékként, ezért a szín minden értékét el kell osztani 255-tel. A meglévő szürkeárnyalatos képet átalakítom színes képpé a már korábban bemutatott módon, majd a színes képet HSV színterűvé. Ezután indítok egy for ciklust a k értékein, ami csak úgy, mint az RGB színezésnél a label értékeket fogja jelölni. Ezután a \texttt{colors} tömbből megkapott RGB színt átkonvertálom HSV színné. Minden olyan pixelt, ami a \texttt{label\_map} szerint az éppen vizsgált label értékű, kiszínezek a megadott szín szerint. A konvertálás során a HSV szín értékei 0 és 1 közötti értékek lettek, így ezeket még fel kell szorozni, hogy a megfelelő színeket kapjuk. A V értéke mindenhol marad az eredeti, szürkeárnyalatos kép V értéke.
+
+A színezés eredménye a \ref{fig:colorized_hsv}. ábrán látható. 
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.7]{images/colorized_hsv.png}
+\caption{Szürkeárnyalatos kép kiszínezése HSV színtérben.}
+\label{fig:colorized_hsv}
+\end{figure}
+
+A képet a kiszínezés után az egyszerű kirajzolás érdekében visszaalakítottam RGB színterűvé. Jól látható, hogy a két színtérben történő színezés ugyanazt a képet eredményezi.
+
+\Section{Képek színének visszabecslése}
+
+Az előző alfejezetekben bemutatott színezés során a kép színeit általam előre meghatározott színekből választottam ki. 
