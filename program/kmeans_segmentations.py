@@ -1,0 +1,111 @@
+import math
+import numpy as np
+from matplotlib import pyplot as plt
+from sklearn.neighbors import KNeighborsClassifier
+
+#my modules
+import segmentation_methods as sm
+import commonmethods.image_modification as im
+import commonmethods.optimal_cluster_number as ocn
+
+def kmeans_segmentation(image, image_index):
+    pixel_values = image.reshape((-1, 1))
+    
+    #Getting the optimal cluster number
+    db_min = [1000000, 2]
+    for k in range(2, 11):
+        _,labels,_ = im.kmeans_segmentation(pixel_values, k)
+        
+        _, db_score = ocn.davies_bouldin_method(pixel_values, labels)
+        
+        if(db_score < db_min[0]):
+            db_min = [db_score, k]
+            
+    k = db_min[1]
+    
+    _,labels,(centers) = im.kmeans_segmentation(pixel_values, k)
+    
+    centers = np.uint8(centers)
+    
+    segmented_image = centers[labels.flatten()]
+    
+    segmented_image = segmented_image.reshape(image.shape)
+    
+    plt.figure(figsize=(6,6))
+    
+    plt.imshow(segmented_image, cmap="gray", vmin=0, vmax=255)
+    plt.title("Image after K-means clustering")
+    plt.axis("off")
+    plt.savefig('results/' + format(image_index) + '/01_kmeans_segmented.png')
+
+def kmeans_texture_segmentation(image, k, px, image_index):
+    
+    window_values, pixels = sm.get_window_values(image, 1000, px)
+
+    _, labels, _ = im.kmeans_segmentation(window_values, k)
+    
+    chosen_k, values_train, labels_train  = sm.determine_K_value(window_values, labels)
+    
+    height = image.shape[0]
+    width = image.shape[1]
+    
+    knn_model = KNeighborsClassifier(n_neighbors=chosen_k)
+    knn_model.fit(values_train, labels_train)
+    
+    label_map = np.full((height, width), -1)
+
+    for i in range(height-px):
+        for j in range(width-px):
+            if(label_map[i][j] == -1):
+                test_window = sm.get_window(image, i, j, px)
+    
+                test_window = test_window.reshape((1, -1))
+    
+                predicted = knn_model.predict(test_window)
+                
+                for k in range(0, px):
+                    for l in range(0, px):
+                        label_map[i+k][j+l] = predicted
+
+    colored_image_windows = sm.color_image(image, label_map)
+
+    plt.figure(figsize=(6,6))
+    plt.title("Image after K-means texture based clustering, \n classified by windows")
+    plt.axis("off")
+    plt.imshow(colored_image_windows)
+    plt.savefig('results/' + format(image_index) + '/02_kmeans_texture_windows.png')
+    
+    window_values = window_values.reshape((-1, 1))
+
+    label_map = np.full((height, width), -1)
+    train_labels = []
+    
+    for i in range(len(pixels)):
+        for j in range(0, px):
+            for k in range(0, px):
+                train_labels.append(labels[i])
+    
+    chosen_k = int(math.sqrt(window_values.shape[0]))
+    
+    knn_model = KNeighborsClassifier(n_neighbors=chosen_k)
+    knn_model.fit(window_values, train_labels)
+                
+    for i in range(height):
+        for j in range(width):
+            if(label_map[i][j] == -1):
+                test_pixel = image[i][j]
+                test_pixel = test_pixel.reshape((1, -1))
+    
+                predicted = knn_model.predict(test_pixel)
+                
+                label_map[i][j] = predicted
+    
+    colored_image_pixels = sm.color_image(image, label_map)
+    
+    plt.figure(figsize=(6,6))
+    plt.title("Image after K-means texture based clustering, \n classified by pixels")
+    plt.axis("off")
+    plt.imshow(colored_image_pixels)
+    plt.savefig('results/' + format(image_index) + '/03_kmeans_texture_pixels.png')
+    
+    return label_map
