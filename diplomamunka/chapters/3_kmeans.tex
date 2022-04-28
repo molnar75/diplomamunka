@@ -723,4 +723,15 @@ Az eddigiekkel szemben a \ref{method_pixel}. módszer szegmentálása sokkal pon
 
 Az tisztán látható, hogy mind a két módszer ugyanazokat a szegmenseket eredményezi. A futási idejüket tekintve amíg az \ref{method_window}. módszer pár másodperc alatt lefut, addig a \ref{method_pixel}. módszernek átlagban 14 perc szükséges a futásához.
 
+Megvizsgáltam, hogy ha változtatom az ablakok méretét, akkor vajon sikerül-e jobb eredményt elérni a textúra alapú szegmentálás során. A vizsgálat eredménye a \ref{fig:window_different_px}. ábrán látható.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.7]{images/window_different_px.png}
+\caption{A kép szegmentálása különböző méretű ablakok segítségével.}
+\label{fig:window_different_px}
+\end{figure}
+
+Azt feltételeznénk, hogy minél nagyobb az ablak, annál több információt tartalmaz, így valamivel pontosabb a szegmentálás. Ám jól látható, hogy hiába növeltem az ablakok méretét, az algoritmusom ugyan azokat a szegmenseket találta meg a képen. 
+
 Mivel a kép szegmentálása megtörtént, így már csak a tényleges kiszínezése van hátra, amivel a következő fejezetben foglalkozok. 
