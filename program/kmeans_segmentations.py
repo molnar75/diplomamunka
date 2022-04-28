@@ -9,6 +9,11 @@ import commonmethods.image_modification as im
 import commonmethods.optimal_cluster_number as ocn
 
 def kmeans_segmentation(image, image_index):
+    """
+    Method for 
+    :param image: the image that I want to get the window from
+    :param image_index: the row where the window left corner pixel should start
+    """
     pixel_values = image.reshape((-1, 1))
     
     #Getting the optimal cluster number
@@ -38,11 +43,21 @@ def kmeans_segmentation(image, image_index):
     plt.axis("off")
     plt.savefig('results/' + format(image_index) + '/01_kmeans_segmented.png')
 
-def kmeans_texture_segmentation(image, k, px, image_index):
-    
-    window_values, pixels = sm.get_window_values(image, 1000, px)
+def kmeans_texture_segmentation(image, k, px, image_index, cnn_model):
+    """
+    Method for segmenting the image by texture and saving the results.
+    :param image: the image that I want to segment
+    :param k: number of the clusters
+    :param px: the width and height of the windows
+    :param image_index: the index of the image for saving the result
+    :param cnn_model: the CNN modell for predicting the colors to the windows
+    :return: the map of labels and the labels of the colors
+    """
+    window_values, pixels = sm.get_window_values(image, 3000, px)
 
     _, labels, _ = im.kmeans_segmentation(window_values, k)
+    
+    color_labels = predict_color_with_cnn(cnn_model, window_values, labels, k)
     
     chosen_k, values_train, labels_train  = sm.determine_K_value(window_values, labels)
     
@@ -108,4 +123,29 @@ def kmeans_texture_segmentation(image, k, px, image_index):
     plt.imshow(colored_image_pixels)
     plt.savefig('results/' + format(image_index) + '/03_kmeans_texture_pixels.png')
     
-    return label_map
+    return label_map, color_labels
+
+def predict_color_with_cnn(cnn_model, window_values, labels, k):
+    """
+    Method for predicting the colors to the windows with CNN.
+    :param cnn_model: the CNN modell for predicting the colors to the windows
+    :param window_values: the windows that I want to predict the colors for
+    :param labels: the labels of the windows
+    :param k: number of the clusters
+    :return: the list of predicted colors to the labels
+    """
+    color_labels = np.zeros((k, 13), dtype = int)
+    
+    for i in range(len(labels)):
+        test_window = window_values[i]
+        
+        test_window = test_window/255
+        
+        test_window = test_window.reshape((15, 15))
+        test_window = np.expand_dims(test_window, axis = 0)
+        
+        color_label = np.argmax(cnn_model.predict(test_window))
+                
+        color_labels[labels[i]][color_label] = color_labels[labels[i]][color_label] + 1
+        
+    return color_labels

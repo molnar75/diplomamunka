@@ -31,8 +31,7 @@ def get_window_values(image, window_quantity, px):
     :param image: the image that i want to get the random windows from
     :param window_quantity: the amount of windows that i want to get
     :param px: the width and height of the windows
-    :return: the result, which is the vector created from the 1 x px*px sized windows, 
-        and the pixels, an array that contains the start pixels of the windows
+    :return: the result, which is the vector created from the 1 x px*px sized windows, and the pixels, an array that contains the start pixels of the windows
     """
     height = image.shape[0]
     width = image.shape[1]
@@ -60,12 +59,9 @@ def get_label_map(height, width, pixels, labels, px):
     Method for getting the label to each pixel of the windows. 
     :param height: the height of the image that contains the windows
     :param width: the width of the image that contains the windows
-    :param pixels: the starting pixels of the previously 
-        calculated windows
+    :param pixels: the starting pixels of the previously calculated windows
     :param px: the width and height of the windows
-    :return: an array in the shape of the image, 
-        the values are -1 where the pixel is not segmented, 
-        the labels elswhere
+    :return: an array in the shape of the image, the values are -1 where the pixel is not segmented, the labels elswhere
     """
     label_map = np.full((height, width), -1)
 
@@ -81,8 +77,7 @@ def color_image(image, label_map):
     """
     Method for colorizing the image based on the label_map. 
     :param image: the image which I want to colorize
-    :param label_map: the map of the labels, I choose the color of the pixels 
-        by the label given to the pixel
+    :param label_map: the map of the labels, I choose the color of the pixels by the label given to the pixel
     :return: the colorized image
     """
     height = image.shape[0]
