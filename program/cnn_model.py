@@ -22,7 +22,7 @@ def get_training_data():
     """
     datas = []
     labels = []
-    number_of_images = 10
+    number_of_images = 11
     
     px = 15
     middle_index = int(px/2)
@@ -58,25 +58,25 @@ def get_training_data():
                 label = 12
             elif(h < 20):
                 label = 0
-            elif(h > 20 and h < 60):
+            elif(h >= 20 and h < 60):
                 label = 1 
-            elif(h > 60 and h < 90):
+            elif(h >= 60 and h < 90):
                 label = 2 
-            elif(h > 90 and h < 120):
+            elif(h >= 90 and h < 120):
                 label = 3
-            elif(h > 120 and h < 150):
+            elif(h >= 120 and h < 150):
                 label = 4
-            elif(h > 150 and h < 180):
+            elif(h >= 150 and h < 180):
                 label = 5
-            elif(h > 180 and h < 210):
+            elif(h >= 180 and h < 210):
                 label = 6
-            elif(h > 210 and h < 240):
+            elif(h >= 210 and h < 240):
                 label = 7
-            elif(h > 240 and h < 270):
+            elif(h >= 240 and h < 270):
                 label = 8
-            elif(h > 270 and h < 300):
+            elif(h >= 270 and h < 300):
                 label = 9
-            elif(h > 300):
+            elif(h >= 300):
                 label = 10
                 
             if(label != -1):
@@ -86,7 +86,10 @@ def get_training_data():
                     datas = np.array([gray_window])
                 else:
                     datas = np.vstack([datas, [gray_window]])
-                
+      
+    unique, counts = np.unique(labels, return_counts=True)
+    print(dict(zip(unique, counts)))      
+      
     labels = to_categorical(labels)
     
     x_train, x_test, y_train, y_test = train_test_split(datas, labels, stratify = labels, train_size = 0.8)
@@ -106,7 +109,10 @@ def get_model():
     
     model=Sequential()
     
-    model.add(Conv2D(32,(3,3),activation='relu',input_shape=(15, 15, 1)))
+    model.add(Conv2D(64,(3,3),activation='relu',input_shape=(15, 15, 1)))
+    model.add(MaxPool2D(2,2))
+    
+    model.add(Conv2D(32,(3,3),activation='relu'))
     model.add(MaxPool2D(2,2))
     
     model.add(Flatten())

@@ -86,13 +86,20 @@ def color_image(image, label_map):
     colored_image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
     
     colors = np.array([
-        [0, 0, 255],   #blue
-        [255, 0, 0],   #red
-        [255, 255, 0], #yellow
-        [0, 255, 0],   #lime
-        [0, 255, 255], #cyan
-        [255, 150, 0]  #orange
-    ])
+        [255, 0, 0],     #red
+        [255, 165, 0],   #orange
+        [255, 255, 0],   #yellow
+        [0, 255, 0],     #lime
+        [0, 128, 0],     #green
+        [0, 255, 180],   #aquamarine
+        [0, 255, 255],   #cyan
+        [0, 100, 255],   #light blue
+        [0, 0, 255],     #blue
+        [128, 0, 128],   #purple
+        [255, 0, 255],   #magenta
+        [0, 0, 0],       #black
+        [255, 255, 255]  #white
+       ])
 
     for i in range(height):
         for j in range(width):

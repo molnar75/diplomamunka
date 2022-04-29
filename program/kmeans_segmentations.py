@@ -148,4 +148,5 @@ def predict_color_with_cnn(cnn_model, window_values, labels, k):
                 
         color_labels[labels[i]][color_label] = color_labels[labels[i]][color_label] + 1
         
+    print(color_labels)
     return color_labels

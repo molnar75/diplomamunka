@@ -9,7 +9,7 @@ import cnn_model as cnn
 if __name__ == '__main__':
     
     number_of_images = 6
-    k_texture_values = [6, 5, 6, 3, 6, 5]
+    k_texture_values = [8, 5, 6, 3, 6, 5]
     
     cnn_model = cnn.get_model()
     print('CNN model configuration done!')
@@ -36,7 +36,10 @@ if __name__ == '__main__':
         cm.color_hsv(resized_image, label_map, k_texture_values[i], i)
         print('   - image hsv colorization done!')
         
-        cm.color_by_predicted_colors(resized_image, label_map, color_labels, k_texture_values[i], i)
+        cm.color_rgb_by_predicted_colors(resized_image, label_map, color_labels, k_texture_values[i], i)
         print('   - image rgb colorization with predicted colors done!')
+        
+        cm.color_hsv_by_predicted_colors(resized_image, label_map, color_labels, k_texture_values[i], i)
+        print('   - image hsv colorization with predicted colors done!')
         
         plt.close('all') #closing all figures

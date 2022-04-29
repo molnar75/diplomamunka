@@ -44,8 +44,7 @@ def color_rgb(image, label_map, k, image_index):
     plt.imshow(colored_image_rgb)
     plt.savefig('results/' + format(image_index) + '/04_rgb_colorization.png')
     
-    
-def color_by_predicted_colors(image, label_map, color_labels, k, image_index):
+def color_rgb_by_predicted_colors(image, label_map, color_labels, k, image_index):
     """
     Coloring the RGB image with the predicted colors and saving the image to the results folder.
     :param image: the image that I want to color
@@ -103,3 +102,37 @@ def color_hsv(image, label_map, k, image_index):
     colored_rgb = cv2.cvtColor(colored_image_hsv, cv2.COLOR_HSV2RGB)
     plt.imshow(colored_rgb)
     plt.savefig('results/' + format(image_index) + '/05_hsv_colorization.png')
+    
+    
+def color_hsv_by_predicted_colors(image, label_map, color_labels,  k, image_index):
+    """
+    Coloring the HSV image and saving it to the results folder.
+    :param image: the image that I want to color
+    :param label_map: the label map for the image
+    :param color_labels: list of predicted colors to the labels
+    :param k: the number of the clusters
+    :param image_index: the index of the image for saving the result
+    """
+    colored_image_rgb = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    
+    hsv_image = cv2.cvtColor(colored_image_rgb, cv2.COLOR_RGB2HSV)
+    
+    colored_image_hsv = hsv_image
+    
+    height = image.shape[0]
+    width = image.shape[1]
+    
+    for label in range(k):
+        color_label = np.argmax(color_labels[label])
+        color_hsv = colorsys.rgb_to_hsv(colors[color_label][0]/255, colors[color_label][1]/255, colors[color_label][2]/255)
+        for i in range(height):
+            for j in range(width):
+                if(label_map[i][j] == label):
+                    colored_image_hsv[i][j] = [color_hsv[0]*180, color_hsv[1]*255, hsv_image[i][j][2]]
+    
+    plt.figure(figsize=(6,6))
+    plt.title("Image colorized by predicted colors \n in HSV colorspace")
+    plt.axis("off")
+    colored_rgb = cv2.cvtColor(colored_image_hsv, cv2.COLOR_HSV2RGB)
+    plt.imshow(colored_rgb)
+    plt.savefig('results/' + format(image_index) + '/07_hsv_predicted_colorization.png')
