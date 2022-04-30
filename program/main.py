@@ -9,7 +9,7 @@ import cnn_model as cnn
 if __name__ == '__main__':
     
     number_of_images = 6
-    k_texture_values = [8, 5, 6, 3, 6, 5]
+    k_texture_values = [8, 5, 6, 5, 6, 5]
     
     cnn_model = cnn.get_model()
     print('CNN model configuration done!')

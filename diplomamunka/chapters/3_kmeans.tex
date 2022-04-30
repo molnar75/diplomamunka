@@ -105,10 +105,10 @@ A paramétereket úgy állítottam be hogy 10 alkalommal fusson le az algoritmus
 
 Ezeket a paramétereket a \cite{kmeans_opencv} dokumentáció alapján határoztam meg, egyedül a pontosságot, az \texttt{epsilon} értékét állítottam kisebbre mint a dokumentációban szereplő érték.
 
-A k-means módszert kétféleképpen teszteltem le. Először csak a kép intenzitását vettem figyelembe, és az összes képpontot átadtam az algoritmusnak szegmentálásra. Ezek után feature vektorokat hoztam létre azzal a szándékkal, hogy textúra alapján végezzem a szegmentálást. A vizsgálatok eredménye a \ref{kmeans_intensity}. illetve a \ref{kmeans_texture} fejezetekben található.
+A K-means módszert kétféleképpen teszteltem le. Először csak a kép intenzitását vettem figyelembe, és az összes képpontot átadtam az algoritmusnak szegmentálásra. Ezek után feature vektorokat hoztam létre azzal a szándékkal, hogy textúra alapján végezzem a szegmentálást. A vizsgálatok eredménye a \ref{kmeans_intensity}. illetve a \ref{kmeans_texture}. fejezetekben található.
 
 \Section{Optimális klaszterszám meghatározása} \label{optimal_cluster_number}
-Mint már említettem, a K-menas módszer egyik legfontosabb mozzanat a K érték meghatározása. Ez a fejezet néhány módszert mutat be, amellyel ezt meg tudjuk tenni.
+Mint már említettem, a K-means módszer egyik legfontosabb mozzanat a K érték meghatározása. Ez a fejezet néhány módszert mutat be, amellyel ezt meg tudjuk tenni.
 
 Az optimális klaszterszám meghatározásához 4 módszert teszteltem le, ezeknek az eredménye a következő alfejezetekben található.
 A módszereket a \cite{tomatoleaf} és a \cite{elbow} kutatások alapján választottam.
@@ -732,6 +732,6 @@ Megvizsgáltam, hogy ha változtatom az ablakok méretét, akkor vajon sikerül-
 \label{fig:window_different_px}
 \end{figure}
 
-Azt feltételeznénk, hogy minél nagyobb az ablak, annál több információt tartalmaz, így valamivel pontosabb a szegmentálás. Ám jól látható, hogy hiába növeltem az ablakok méretét, az algoritmusom ugyan azokat a szegmenseket találta meg a képen. 
+Azt feltételeznénk, hogy minél nagyobb az ablak, annál több információt tartalmaz, így valamivel pontosabb a szegmentálás. Ám jól látható, hogy hiába növeltem az ablakok méretét, az algoritmusom ugyan azokat a szegmenseket találta meg a képen.
 
 Mivel a kép szegmentálása megtörtént, így már csak a tényleges kiszínezése van hátra, amivel a következő fejezetben foglalkozok. 

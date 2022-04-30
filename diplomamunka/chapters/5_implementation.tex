@@ -1,0 +1,51 @@
+\Chapter{A vizsgálatokhoz készített programok}
+
+Ahogy már a korábbi fejezetekben említettem, a dolgozathoz Python programozási nyelvet használtam. A vizsgálatokhoz elsősorban Jupyter munkafüzeteket készítettem, majd a vizsgálatok lezárultával ezeket a kódrészleteket összefoglaltam Python modulokba, és készítettem belőlük egy különálló programot.
+
+A fő program és a munkafüzetek futtatásához a következő függőségek szükségesek:
+\begin{itemize}
+\item NumPy
+\item OpenCv
+\item Matplotlib
+\item Scikit-learn
+\item Scikit-image
+\item Tensorflow
+\item Az általam készített commonmethods
+\end{itemize}
+
+A következő 2 fejezet tartalmazza a fő program, és a Jupyter munkafüzetek felépítését és használatát.
+
+\Section{Képek szegmentálása és kiszínezése}
+A program során beolvasom a teszteléshez használt képeket egyesével, majd elvégzem rájuk az előző fejezetekben taglalt vizsgálatokat, kezdve a szegmentálással, lezárva a színezéssel.
+
+Minden fázis végén lementem a kapott vizsgálat eredményét úgy, ahogy a \ref{fig:result_all}. ábrán látható. Az eredmények egy \texttt{results} nevű mappába kerülnek, ahol minden képnek létrehozok egy, a nevükkel ellátott mappát, és az eredményeik a saját mappájukba mentődnek.
+
+Ezeket a folyamatokat a \texttt{main.py} modul foglalja össze. Ebben hívom meg a CNN modellem megalkotását, majd egyenként a képekre az összes vizsgálatot. A \texttt{main} modulban a következő egyéb modulokat használom:
+\begin{itemize}
+\item \texttt{cnn\_model}: A tanító halmaz előállításáért, és a CNN modell megalkotásáért felel.
+\item \texttt{colorization\_methods}: A színező algoritmusok találhatók meg ebben a modulban.
+\item \texttt{kemans\_segmentations}: Ebben a modulban található meg az intenzitás alapú K-means szegmentálás, illetve a textúra alapú K-means szegmentálási metódus is. A \texttt{segmentation\_methods} modult használja.
+\item \texttt{manage\_directories}: Ebben a modulban hozom létre a \texttt{results} mappát, és a képek neveivel az almappákat. A program minden alkalommal törli a már létező mappákat, és újra létrehozza őket.
+\item \texttt{segmentation\_methods}: Ez a modul tartalmazza az összes olyan metódust, amit a K-means szegmentálás során használok. Ide tartozik az ablakok kinyerése, a címke térkép elkészítése, a KNN osztályozó K értékének a meghatározása és a random színekkel történő, ablakonkénti színezés.
+\end{itemize}
+
+Ezekben a modulokban található metódusok többnyire szó szerint a munkafüzetekből átvett kódrészletek.
+
+A programot azért készítettem el, mivel így egyszerűen le lehet futtatni az összes vizsgálatot egy adott képre, ezen kívül könnyedén végig követhető az a folyamat, ami alatt a szürkeárnyalatos képből színes képet kapunk. A \texttt{main} modul a konzolra kiírja, hogy éppen milyen nevű képnél tart, és hogy a vizsgálat mely fázisát fejezte már be.
+
+\Section{Jupyter munkafüzetek használata}
+
+A vizsgálatok során a kódrészleteket Jupyter munkafüzetekben készítettem el, ott teszteltem őket. A kutatásom során a következő munkafüzetek készültek el.
+\begin{itemize}
+\item \texttt{01\_kmeans\_segmentation\_rgb.ipynb}: A K-means klaszterezés tesztelése színes képekre. 
+\item \texttt{02\_kmeans\_segmentation\_grayscale.ipynb}: A K-means klaszterezés tesztelése szürkeárnyalatos képekre.
+\item \texttt{03\_determine\_cluster\_number.ipynb}: Különböző módszerek vizsgálata a K érték meghatározására. 
+\item \texttt{04\_compare\_cluster\_number\_methods.ipynb}: A már korábban vizsgált, klaszterszám meghatározására szolgáló módszerek összehasonlítása.
+\item \texttt{05\_silhouette\_method.ipynb}: Külön vizsgálat a Silhouette-módszerre, mivel az első vizsgálatok során nem futott le az algortimus belátható időn belül, így külön megvizsgáltam, hogy vajon mi lehetett ennek az oka. Mint a \ref{optimal_cluster_number}. fejezetben kifejtettem, a módszer nagy adathalmazzal nehezen boldogul.
+\item \texttt{06\_elbow\_method.ipynb}: Az Elbow módszer vizsgálata.
+\item \texttt{07\_kmeans\_texture.ipynb}: A textúra alapú K-means klaszterezés.
+\item \texttt{08\_colorization.ipynb}: A szegmentált kép kiszínezése RGB és HSV színterekben. 
+\item \texttt{09\_superpixel.ipynb}: A szegmentálás egy másik formája, ami végül nem került bele a dolgozatba. 
+\end{itemize}
+
+A munkafüzetben a vizsgálatok során a különböző kódrészek külön cellákban találhatók meg. Ezeket futtatva megkapjuk az adott kódrészlet eredményét. 

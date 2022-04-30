@@ -103,7 +103,6 @@ def color_hsv(image, label_map, k, image_index):
     plt.imshow(colored_rgb)
     plt.savefig('results/' + format(image_index) + '/05_hsv_colorization.png')
     
-    
 def color_hsv_by_predicted_colors(image, label_map, color_labels,  k, image_index):
     """
     Coloring the HSV image and saving it to the results folder.

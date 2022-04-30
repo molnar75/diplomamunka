@@ -63,7 +63,7 @@ Ehhez két külön metódust készítettem:
 \item \texttt{load\_image\_rgb}
 \item \texttt{load\_image\_grayscale}
 \end{itemize}
-Ezek eleinte minden notebookban ismétlődtek, majd a kutatás későbbi szakaszában kiszerveztem őket a \texttt{commonmethods} nevű saját készítésű python librarybe amiről részletesebben a következő alfejezetben írok.
+Ezek eleinte minden munkafüzetben ismétlődtek, majd a kutatás későbbi szakaszában kiszerveztem őket a \texttt{commonmethods} nevű saját készítésű python librarybe amiről részletesebben a következő alfejezetben írok.
 
 A szürkeárnyalatos kép betöltését a következő kódrészlet tartalmazza.
 \begin{python}
@@ -83,7 +83,7 @@ def load_image_grayscale(name):
 \end{python}
 A színes kép betöltése annyiban különbözik, hogy a cv2.COLOR\_BGR2GRAY helyett cv2.COLOR\_BGR2RGB szerepel.
 
-Mind a két metódus a kép nevét várja bemenetként. Mivel a tesztelés során használt képek mindegyike JPG típusú így a kiterjesztést a metódus automatikusan hozzákapcsolja.
+Mind a két metódus a kép nevét várja bemenetként. Mivel a tesztelés során használt képek mindegyike JPG típusú, így a kiterjesztést a metódus automatikusan hozzákapcsolja.
 
 \SubSection{Átméretezés}
 

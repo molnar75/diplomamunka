@@ -22,7 +22,7 @@ def get_training_data():
     """
     datas = []
     labels = []
-    number_of_images = 11
+    number_of_images = 10
     
     px = 15
     middle_index = int(px/2)
