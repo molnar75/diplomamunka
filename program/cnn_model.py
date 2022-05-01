@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 #my modules
@@ -22,7 +21,7 @@ def get_training_data():
     """
     datas = []
     labels = []
-    number_of_images = 10
+    number_of_images = 11
     
     px = 15
     middle_index = int(px/2)
@@ -87,9 +86,6 @@ def get_training_data():
                 else:
                     datas = np.vstack([datas, [gray_window]])
       
-    unique, counts = np.unique(labels, return_counts=True)
-    print(dict(zip(unique, counts)))      
-      
     labels = to_categorical(labels)
     
     x_train, x_test, y_train, y_test = train_test_split(datas, labels, stratify = labels, train_size = 0.8)
@@ -124,16 +120,6 @@ def get_model():
     
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     
-    history = model.fit(x_train, y_train, epochs=30, validation_data=(x_test, y_test))
-    
-    plt.figure(figsize=(6,6))
-    
-    plt.plot(history.history['accuracy'], label='Tanító halmaz pontossága')
-    plt.plot(history.history['val_accuracy'], label = 'Teszt halmaz pontossága')
-    plt.xlabel('Tanítások száma')
-    plt.ylabel('Pontosság')
-    plt.legend(loc='lower right')
-    
-    plt.savefig('cnn_accuracy.png')
+    model.fit(x_train, y_train, epochs=30, validation_data=(x_test, y_test))
     
     return model

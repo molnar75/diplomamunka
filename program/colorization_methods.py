@@ -44,7 +44,7 @@ def color_rgb(image, label_map, k, image_index):
     plt.imshow(colored_image_rgb)
     plt.savefig('results/' + format(image_index) + '/04_rgb_colorization.png')
     
-def color_rgb_by_predicted_colors(image, label_map, color_labels, k, image_index):
+def color_rgb_by_predicted_colors(image, label_map, color_labels, k, image_index, method):
     """
     Coloring the RGB image with the predicted colors and saving the image to the results folder.
     :param image: the image that I want to color
@@ -70,7 +70,7 @@ def color_rgb_by_predicted_colors(image, label_map, color_labels, k, image_index
     plt.title("Image colorized by predicted colors \n in RGB colorspace")
     plt.axis("off")
     plt.imshow(colored_image_rgb)
-    plt.savefig('results/' + format(image_index) + '/06_rgb_predicted_colorization.png')
+    plt.savefig('results/' + format(image_index) + '/06_rgb_' + format(method) + '_predicted_colorization.png')
     
 def color_hsv(image, label_map, k, image_index):
     """
@@ -103,7 +103,7 @@ def color_hsv(image, label_map, k, image_index):
     plt.imshow(colored_rgb)
     plt.savefig('results/' + format(image_index) + '/05_hsv_colorization.png')
     
-def color_hsv_by_predicted_colors(image, label_map, color_labels,  k, image_index):
+def color_hsv_by_predicted_colors(image, label_map, color_labels,  k, image_index, method):
     """
     Coloring the HSV image and saving it to the results folder.
     :param image: the image that I want to color
@@ -134,4 +134,4 @@ def color_hsv_by_predicted_colors(image, label_map, color_labels,  k, image_inde
     plt.axis("off")
     colored_rgb = cv2.cvtColor(colored_image_hsv, cv2.COLOR_HSV2RGB)
     plt.imshow(colored_rgb)
-    plt.savefig('results/' + format(image_index) + '/07_hsv_predicted_colorization.png')
+    plt.savefig('results/' + format(image_index) + '/07_hsv_' + format(method) + '_predicted_colorization.png')

@@ -1,0 +1,15 @@
+\Chapter{Szuperpixel}
+
+Miután a K-means módszer segítségével nem sikerült megfelelően megvalósítanom a szegmentálást, így más megközelítést kerestem. Számos tudományos cikkben láttam említést az úgynevezett szuperpixelekről, így végül erre a módszerre esett a választásom.
+
+A szuperpixel módszer során a pixelekből nagyobb csoportokat, úgynevezett szuperpixeleket képez az algoritmus. A pixelek csoportosításához különféle jellemzők állnak rendelkezésre, például a fényerő, az intenzitás, a textúra, a kontúr. A szuperpixeleket számos területen használják, mint a képszegmentálás, a csontvázolás (skeletonization), az objektum lokalizálás, és a képindexelés. Maguk a szuperpixelek a túlzott szegmentálás eredményei. 
+
+Általánosságban elmondható, hogy a szuperpixel módszereknek 2 csoportja van, a gradiens-emelkedésen (gradient-ascent) alapuló algoritmusok, és a gráf-alapú algoritmusok.
+
+A gráf-alapú algoritmus minden egyes képpontot egy gráf csomópontjaként kezel, és a két csomópont közötti élsúlyokat a képpontok közötti hasonlósággal arányosan határozza meg. Az egyik módszer amit teszteltem, a Felzenszwalb algoritmus egy példa a gráf-alapú algoritmusokra.
+
+A gradiens-emelkedés alapú algoritmusok durva klaszterezéssel kezdenek. Ez egy iteratív folyamat, ahol minden egyes iteráció során az előző iterációból új klasztereket finomítanak a jobb szegmentáció elérése érdekében, amíg a konvergenciát el nem érik. A másik három módszer amit teszteltem, a SLIC, a Quick shift és a Watershed ebbe az osztályba tartozik.
+
+
+
+\cite{superpixel}
