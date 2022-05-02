@@ -34,6 +34,8 @@ Ezekben a modulokban található metódusok többnyire szó szerint a munkafüze
 
 A programot azért készítettem el, mivel így egyszerűen le lehet futtatni az összes vizsgálatot egy adott képre, ezen kívül könnyedén végig követhető az a folyamat, ami alatt a szürkeárnyalatos képből színes képet kapunk. A \texttt{main} modul a konzolra kiírja, hogy éppen milyen nevű képnél tart, és hogy a vizsgálat mely fázisát fejezte már be.
 
+A futási idejét tekintve a programnak a CNN modell betanítása átlagban 5 percet, a K-means vizsgálatok átlagban 20 percet, míg a szuperpixeles vizsgálatok átlagban 10 percet vesznek igénybe. Természetesen ezek a futási idők a modell tanításának a kivételével nagyban függnek a teszt képek méretétől. A futási időket csökkentettem azzal, hogy minden képet átméretezek a vizsgálatok előtt 1024px magasságúra. Így, ha minden képre lefuttatok minden vizsgálatot, akkor olyan 3 óra a teljes futási idő.
+
 \Section{Jupyter munkafüzetek használata}
 
 A vizsgálatok során a kódrészleteket Jupyter munkafüzetekben készítettem el, ott teszteltem őket. A kutatásom során a következő munkafüzetek készültek el.

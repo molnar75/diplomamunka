@@ -308,16 +308,18 @@ A modell pontosságát maximum 72\%-ra tudtam megnöveli, és sajnos így sem pr
 
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.5]{images/result_all_superpixel.png}
+\includegraphics[scale=0.4]{images/result_all_superpixel.png}
 \caption{A vizsgálatok futtatása CNN színezéssel az összes Szuperpixel módszerekkel klaszterezett teszt képre. Az oszlopok a következő képeket tartalmazzák: (a) eredeti, színes kép (b) eredeti, szürkeárnyalatos kép (c) SLIC módszerrel szegmentált kép HSV színtérben színezve (d) Watershed módszerrel szegmentált kép HSV színtérben}
 \label{fig:result_all_superpixel}
 \end{figure}
 
-K-measn esetén adott klaszterhez a szín meghatározása többségi döntés alapján történik, miután kinyertem a minta ablakokat és szegmentáltam őket. Az egy címkét kapott ablakokat átadom a CNN modellemnek, majd a CNN által meghatározott címke számlálóját növelem. Amire a legtöbb szavazat érkezik egy adott címkén belül, az a győztes szín.
-
-A szuperpixel módszerek esetén minden szuperpixelre egy vizsgálatot végzek, és annak a predikciónak az eredménye lesz a kapott szín. Szembetűnő, hogy csak a különböző szuperpixeleket vizsgálva gyakori, hogy az azonos objektumokon belül más-más színeket jósol. Ezt lehetne javítani több mintavétellel az adott szuperpixeleken belül. Az is jól látszik, hogy a SLIC esetén a színezés szebben megvalósult, mint a Watershed esetén. 
+K-means esetén adott klaszterhez a szín meghatározása többségi döntés alapján történik, miután kinyertem a minta ablakokat és szegmentáltam őket. Az egy címkét kapott ablakokat átadom a CNN modellemnek, majd a CNN által meghatározott címke számlálóját növelem. Amire a legtöbb szavazat érkezik egy adott címkén belül, az a győztes szín.
 
 Az \ref{fig:result_all_kmeans}. ábrán megfigyelhető, hogy bár például a 2. képen a körtén belül több szegmenst határozott meg a K-means, a CNN mindegyik szegmensnek ugyanazt a színt jósolta, így a körte egy színű lett. Viszont az is látható, hogy ugyan ezt nem tudta megvalósítani az 1. képen.
+
+A szuperpixel módszerek esetén minden szuperpixelre 20 ablakot viszgálok, az ablakok kezdőpontját random határozom meg. A szín döntése csak úgy, mint a K-means esetén, többségi döntés alapján születik. 
+
+Az \ref{fig:result_all_superpixel}. ábrán szembetűnő, hogy csak a különböző szuperpixeleket vizsgálva gyakori, hogy az azonos objektumokon belül más-más színeket jósol. Ezt lehetne javítani több mintavétellel az adott szuperpixeleken belül, viszont az a futási időt megnövelné. Az is jól látszik, hogy a SLIC módszer jobb színezést eredményez, mint a Watershed módszer. Az összes módszer közül egyedül a SLIC volt az, ami a színezésnél el tudta különíteni a 6. képen az avokádót a többi objektumtól, és más színre színezte.
 
 Ami szembetűnő, hogy a modell sok esetben sárga és fehér színeket jósol az adott ablakokra. Ez abból eredhet, hogy a tanító halmazban több sárga szín található, mint zöld vagy kék, viszont a sárga szín csökkentésével sem értem el jobb eredményt, abban az esetben egy másik színt használt ugyan olyan gyakorisággal. A legtöbbször előforduló szín a minták során a fekete, a színek meghatározásánál viszont a modell nagyon ritkán jósolt fekete színt egy adott klaszterhez. 
 
