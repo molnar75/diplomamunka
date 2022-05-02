@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+import random
 
 #modules to get segments
 from skimage.filters import sobel
@@ -51,7 +52,6 @@ def get_segments_color(image, segments, cnn_model):
     :param cnn_model: the CNN model for the prediction
     :return: the color label map and the quantity of the segments for colorization purposes
     """
-    
     segments_quantity = len(np.unique(segments))
     
     color_labels = np.zeros((segments_quantity, 13))
@@ -69,19 +69,27 @@ def get_segments_color(image, segments, cnn_model):
         
         #getting the indexes of the pixels from the segment
         indexes = np.where(mask == 255)
-        x = indexes[0][0]
-        y = indexes[1][0]
         
-        if(x <= (height-px) and y <= (width-px)):
-            test_window = image[x:x+px, y:y+px]
+        index_list = indexes[0].tolist()
+        
+        if(len(index_list) >= 20):
+            for j in range(20):
+    
+                idx = random.sample(range(0, len(index_list)), 20)
             
-            test_window = test_window/255
-            
-            test_window = test_window.reshape((15, 15))
-            test_window = np.expand_dims(test_window, axis = 0)
-            
-            color_label = np.argmax(cnn_model.predict(test_window))
+                x = indexes[0][idx[j]]
+                y = indexes[1][idx[j]]
+                
+                if(x <= (height-px) and y <= (width-px)):
+                    test_window = image[x:x+px, y:y+px]
                     
-            color_labels[i][color_label] = color_labels[i][color_label] + 1
+                    test_window = test_window/255
+                    
+                    test_window = test_window.reshape((15, 15))
+                    test_window = np.expand_dims(test_window, axis = 0)
+                    
+                    color_label = np.argmax(cnn_model.predict(test_window))
+                            
+                    color_labels[i][color_label] = color_labels[i][color_label] + 1
         
     return color_labels, segments_quantity
