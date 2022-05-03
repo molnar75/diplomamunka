@@ -2,7 +2,7 @@
 
 A szürkeárnyalatos kép és a megkapott címke térkép segítségével már az előző fejezetben ki tudtuk színezni a szegmenseket, viszont a kiszínezés az eredeti kép árnyalatait nem vette figyelembe. A fejezet célja, hogy a színezést úgy valósítsuk meg, hogy az eredeti kép árnyalatait is megjelenítjük. A minél jobb eredmény elérésének érdekében az RGB és HSV színterekben is megvizsgáltam a problémát, ezeknek a vizsgálatoknak az eredménye a következő alfejezetekben található.
 
-Maguk a színterek a színek matematikai ábrázolásai, lehetővé teszik a színek reprodukálható geometriai ábrázolását a 2D-3D terekben. A színterek a színmodellek és a leképezési függvények kombinációja, és információt tartalmaznak a kép egyes pixeleinek a színéről. A színes képek szegmentálására használt gyakori színterek az RGB, YIQ, HSV, CIE XYZ. \cite{colorspaces}
+Maguk a színterek a színek matematikai ábrázolásai, lehetővé teszik a színek reprodukálható geometriai ábrázolását a 2D-3D terekben. A színterek a színmodellek és a leképezési függvények kombinációja, és információt tartalmaznak a kép egyes pixeleinek a színéről. A színes képek szegmentálására használt gyakori színterek az RGB, YIQ, HSV, CIE XYZ \cite{colorspaces}.
 
 \Section{RGB}
 
@@ -12,7 +12,7 @@ Az RGB színterű képekben a kép minden egyes pixelét 3 színnel határozzuk 
 \item zöld (Green)
 \item kék (Blue)
 \end{itemize}
-A paraméterek a szín intenzitását határozzák meg, az értékük egy 0-255 közötti egész szám. Ha mindegyik paraméterből a maximális, 255 értéket vesszük akkor a fehér színt, ha mindegyikből a minimális, az az a 0 értéket vesszük, akkor pedig a fekete színt kapjuk meg.  Egyszerűsége miatt a színtér széles körben elterjedt. \cite{colorspaces}
+A paraméterek a szín intenzitását határozzák meg, az értékük egy 0-255 közötti egész szám. Ha mindegyik paraméterből a maximális, 255 értéket vesszük akkor a fehér színt, ha mindegyikből a minimális, az az a 0 értéket vesszük, akkor pedig a fekete színt kapjuk meg. A színtér széles körben elterjedt, mivel a képalkotó eszközeink alapvetően ezt használják \cite{colorspaces}.
 
 Szürkeárnyalatos képek esetén a 3 paraméter értéke megegyezik, így legtöbb esetben csak 1 értékkel szokták a kép pixeleit jelölni, tehát például szürkeárnyalatos képnél egy fekete színű pixel értéke 0.
 
@@ -23,14 +23,14 @@ colored_image = cv2.cvtColor(resized_image, cv2.COLOR_GRAY2RGB)
 
 Egy adott pixelre a színt a következő képlettel határozom meg:
 \begin{align*}
- \text{new\_pixel\_color} & = (R, G, B) \\
- Y & = \text{grayscale\_image}[i][j]\\
- R_{ij} & = Y \cdot R / 255 \\
- G_{ij} & = Y \cdot G / 255 \\
- B_{ij} & = Y \cdot B / 255 \\
- \text{colored\_image}_{ij} & = (R_{ij}, G_{ij}, B_{ij})
+ \text{new\_pixel\_color} & = (R, G, B), \\
+ Y & = \text{grayscale\_image}_{ij},\\
+ R_{ij} & = Y \cdot R / 255, \\
+ G_{ij} & = Y \cdot G / 255, \\
+ B_{ij} & = Y \cdot B / 255, \\
+ \text{colored\_image}_{ij} & = (R_{ij}, G_{ij}, B_{ij}),
 \end{align*}
-\noindent ahol az $i,j$ a kép adott pixelének az indexe.
+ahol az $i,j$ a kép adott pixelének az indexe.
 
 A pixeleket a \texttt{numpy} csomag \texttt{multiply} függvényével színezem ki a következő kódrészletben látható módon.
 
@@ -54,9 +54,9 @@ A \texttt{multiply} függvény első 2 paramétereként a szorzás 2 tényezőj�
 
 A művelet kimeneti értékének ugyanazt a tömböt adom meg. A szorzásnak megadok egy \texttt{where} feltételt, ahol a címke térkép adott elemét fogja vizsgálni a metódus. Megnézi, hogy az adott címke értéke megegyezik-e az éppen vizsgált címkének az értékével és ha igen, csak akkor végzi el a szorzást, tehát csak akkor színezi ki a pixelt.
 
-Utolsó paraméterként a \texttt{casting} paraméternek unsafe értéket állítok be, ez azt jelenti, hogy a nem egyforma típusú értékek esetén is elvégzi a szorzást a függvény.
+Utolsó paraméterként a \texttt{casting} paraméternek \texttt{unsafe} értéket állítok be, ez azt jelenti, hogy a nem egyforma típusú értékek esetén is elvégzi a szorzást a függvény.
 
-A szorzások után már csak össze kell olvasztanom a 3 különálló tömböt. Ez a \texttt{cv2.merge} függvénnyel egyszerűen megtudom valósítani. A színezésre példa az \ref{fig:colorized_rgb}.ábrán látható.
+A szorzások után már csak össze kell olvasztanom a 3 különálló tömböt. Ez a \texttt{cv2.merge} függvénnyel egyszerűen megtudom valósítani. A színezésre példa \aref{fig:colorized_rgb}. ábrán látható.
 
 \begin{figure}[h]
 \centering
@@ -71,12 +71,12 @@ Itt már szépen megjelennek az árnyékok, jól kivehetőek a színátmenetek.
 
 A HSV színtér szintén széles körben használt, az emberi szem számára megfelelőbb színtér. A HSV színtérben minden pixelt a következő 3 paraméter határoz meg:
 \begin{itemize}
-\item színárnyalat (Hue)
-\item telítettség (Saturation)
-\item érték (Value)
+\item színárnyalat (Hue),
+\item telítettség (Saturation),
+\item érték (Value).
 \end{itemize}
 
-A színárnyalat (H) az alapszínt jelöli vagy fokban vagy számokban. A színek skáláját az \ref{tab:hsv_colors}. táblázat szemlélteti.
+A színárnyalat (H) az alapszínt jelöli vagy fokban vagy számokban. A színek skáláját \aref{tab:hsv_colors}. táblázat szemlélteti.
 
 \begin{table}[h]
 \centering
@@ -104,9 +104,9 @@ A színárnyalat (H) az alapszínt jelöli vagy fokban vagy számokban. A színe
 
 A telítettség (S) azt írja le, hogy a szín milyen mennyiségben tartalmazza a fehér színt. A telítettséget mindig százalékos értékben adjuk meg, a 100\% jelenti a teljesen telített színt. Minél kisebb az értéke, annál halványabb a szín, mivel egyre több szürkét tartalmaz.
 
-Az értéket (V) szokták fényerőnek (Brightness) is hívni, olyankor a színteret HSB színtérként emlegetik, de ez megegyezik a HSV színtérrel. A az érték a szín sötétségét fejezi ki százalékos arányban, ahol a 0\% a fekete, a 100\% a fehér színt jelenti. \cite{colorspaces}
+Az értéket (V) szokták fényerőnek (Brightness) is hívni, olyankor a színteret HSB színtérként emlegetik, de ez megegyezik a HSV színtérrel. A az érték a szín sötétségét fejezi ki százalékos arányban, ahol a 0\% a fekete, a 100\% a fehér színt jelenti \cite{colorspaces}.
 
-A HSV színtérben található szürkeárnyalatos képek a H és S csatornákon 0 értékeket tartalmaznak, a kép csak a V értékeiből áll. Ahhoz, hogy szürkeárnyalatosból színes képet tudjunk készíteni, szükségünk van mind a H és mind az S csatorna értékeire. Az \ref{fig:hsv_colorization}. ábra szemlélteti a színezés megvalósításának lehetőségeit.
+A HSV színtérben található szürkeárnyalatos képek a H és S csatornákon 0 értékeket tartalmaznak, a kép csak a V értékeiből áll. Ahhoz, hogy szürkeárnyalatosból színes képet tudjunk készíteni, szükségünk van mind a H és mind az S csatorna értékeire. \Aref{fig:hsv_colorization}. ábra szemlélteti a színezés megvalósításának lehetőségeit.
 
 \begin{figure}[h]
 \centering
@@ -145,9 +145,9 @@ for label in range(k):
                 [color_hsv[0]*180, color_hsv[1]*255, hsv_image[i][j][2]]
 \end{python}
 
-A színek konvertálására a \texttt{colorsys} csomagot használom, abból is az \texttt{rgb\_to\_hsv} függvényt, ami bemenetként az RGB szín csatornáit várja 0 és 1 közötti értékként, ezért a szín minden értékét el kell osztani 255-tel. A meglévő szürkeárnyalatos képet átalakítom színes képpé a már korábban bemutatott módon, majd a színes képet HSV színterűvé. Ezután indítok egy for ciklust a K értékein, ami csak úgy, mint az RGB színezésnél a címke értékeket fogja jelölni. Ezután a \texttt{colors} tömbből megkapott RGB színt átkonvertálom HSV színné. Minden olyan pixelt, ami a \texttt{label\_map} szerint az éppen vizsgált címke értékével megegyezik, kiszínezek a megadott szín szerint. A konvertálás során a HSV szín értékei 0 és 1 közötti értékek lettek, így ezeket még fel kell szorozni, hogy a megfelelő színeket kapjuk. A V értéke mindenhol marad az eredeti, szürkeárnyalatos kép V értéke.
+A színek konvertálására a \texttt{colorsys} csomagot használom, abból is az \texttt{rgb\_to\_hsv} függvényt, ami bemenetként az RGB szín csatornáit várja 0 és 1 közötti értékként, ezért a szín minden értékét el kell osztani 255-tel. A meglévő szürkeárnyalatos képet átalakítom színes képpé a már korábban bemutatott módon, majd a színes képet HSV színterűvé. Ezután indítok egy for ciklust a $K$ értékein, ami csak úgy, mint az RGB színezésnél a címke értékeket fogja jelölni. Ezután a \texttt{colors} tömbből megkapott RGB színt átkonvertálom HSV színné. Minden olyan pixelt, ami a \texttt{label\_map} szerint az éppen vizsgált címke értékével megegyezik, kiszínezek a megadott szín szerint. A konvertálás során a HSV szín értékei 0 és 1 közötti értékek lettek, így ezeket még fel kell szorozni, hogy a megfelelő színeket kapjuk. A V értéke mindenhol marad az eredeti, szürkeárnyalatos kép V értéke.
 
-A színezés eredménye az \ref{fig:colorized_hsv}. ábrán látható.
+A színezés eredménye \aref{fig:colorized_hsv}. ábrán látható.
 
 \begin{figure}[h]
 \centering
@@ -160,69 +160,69 @@ A képet a kiszínezés után az egyszerű kirajzolás érdekében visszaalakít
 
 \Section{Képek színének visszabecslése}
 
-Az előző alfejezetekben bemutatott színezés során a kép színeit általam előre meghatározott színekből, random választottam ki. Ahhoz, hogy valósághűbb színeket tudjunk adni a képeknek, szükséges valamilyen tanító algoritmus használata.  Mivel az én esetben képekről van szó, így kézenfekvő volt, hogy Konvolúciós Neurális Hálót (Convolutional neural networks - CNN) használjak.
+Az előző alfejezetekben bemutatott színezés során a kép színeit általam előre meghatározott színekből, random választottam ki. Ahhoz, hogy valósághűbb színeket tudjunk adni a képeknek, szükséges valamilyen tanító algoritmus használata.  Mivel az én esetben képekről van szó, így kézenfekvő volt, hogy Konvolúciós Neurális Hálót (\textit{Convolutional Neural Networks, CNN}) használjak.
 
 A tanító algoritmusok közül a CNN az egyik leghíresebb és legelterjedtebb. Ennek az egyik fő oka, hogy az elődeivel szemben a CNN emberi felülvizsgálat nélkül tudja megtanulni a releváns funkciókat. Széles körben alkalmazzák, például beszédfelismerés, arcfelismerés, számítógépes látás során. A CNN-ek felépítését az emberi és állati agyakban található neuronok ihlették, hasonlóan a hagyományos neurális hálózatokhoz.
 
-A hagyományos, teljesen összekapcsolt (Fully Connected - FC) hálózatokkal ellentétben a CNN a megosztott súlyokat és a lokális kapcsolatokat használja arra, hogy teljes mértékben kihasználja a 2D bemeneti adatstruktúrákat. Mivel ez a művelet kevés paramétert használ, így a képzési folyamat egyszerűbb, emiatt gyorsabb a háló működése.\cite{cnn}
+A hagyományos, teljesen összekapcsolt (\textit{Fully Connected, FC}) hálózatokkal ellentétben a CNN a megosztott súlyokat és a lokális kapcsolatokat használja arra, hogy teljes mértékben kihasználja a 2D bemeneti adatstruktúrákat. Mivel ez a művelet kevés paramétert használ, így a képzési folyamat egyszerűbb, emiatt gyorsabb a háló működése \cite{cnn}.
 
 A háló több rétegből épül fel, a leggyakrabban használt rétegeket a következő felsorolás tartalmazza \cite{cnn}:
 \begin{itemize}
-\item Konvolúciós réteg: A CNN-architektúrában a legjelentősebb komponens a konvolúciós réteg, ami konvolúciós szűrők (ún. kernelek) gyűjteményéből áll. A bemeneti képre ezeket a szűrőket alkalmazza, hogy létrehozza a kimeneti jellemtérképet.
-\item Pooling réteg: A pooling réteg fő feladata a jellemtérképek almintavételezése. Más szavakkal a nagy méretű jellemtérképeket összezsugorítja, kisebb térképeket hoz létre, viszont ezzel párhuzamosan a domináns információk többségét megtartja. Néha a CNN teljesítménye ennek a rétegnek az eredményeként csökken, mivel ez a réteg segít a modellnek meghatározni, hogy egy adott funkció elérhető-e az adott bemeneti képen vagy sem.
-\item FC réteg: Ez a réteg általában az egyes CNN-architektúrák végén található. Ezen a rétegen belül minden neuron az előző réteg összes neuronjával kapcsolatban áll, ez az úgynevezett Fully Connected megközelítés. A CNN osztályozójaként használják. A bemenete az utolsó pooling vagy konvolúciós rétegből származik, ez a bemenet egy vektor, ami a jellemtérképekből jön létre. Ennek a rétegnek a kimenete a CNN végső kimenete.
+\item \textit{Konvolúciós réteg}: A CNN-architektúrában a legjelentősebb komponens a konvolúciós réteg, ami konvolúciós szűrők (ún. kernelek) gyűjteményéből áll. A bemeneti képre ezeket a szűrőket alkalmazza, hogy létrehozza a kimeneti jellegtérképet.
+\item \textit{Pooling réteg}: A pooling réteg fő feladata a jellegtérképek almintavételezése. Más szavakkal a nagy méretű jellegtérképeket összezsugorítja, kisebb térképeket hoz létre, viszont ezzel párhuzamosan a domináns információk többségét megtartja. Néha a CNN teljesítménye ennek a rétegnek az eredményeként csökken, mivel ez a réteg segít a modellnek meghatározni, hogy egy adott funkció elérhető-e az adott bemeneti képen vagy sem.
+\item \textit{FC réteg}: Ez a réteg általában az egyes CNN-architektúrák végén található. Ezen a rétegen belül minden neuron az előző réteg összes neuronjával kapcsolatban áll, ez az úgynevezett \textit{Fully Connected} megközelítés. A CNN osztályozójaként használják. A bemenete az utolsó pooling vagy konvolúciós rétegből származik, ez a bemenet egy vektor, ami a jellegtérképekből jön létre. Ennek a rétegnek a kimenete a CNN végső kimenete.
 \end{itemize}
 
 A CNN általános használati felépítése számos konvolúciós rétegből áll, utána következnek a pooling rétegek, majd a befejező rétegek, amik FC rétegek. A modell bemeneti rétege 3 dimenziós:
 \begin{itemize}
-\item magasság
-\item szélesség
-\item mélység
+\item magasság,
+\item szélesség,
+\item mélység.
 \end{itemize}
 Gyakran a magasság és a szélesség megegyezik, a mélység pedig a csatorna számra vonatkozik, például RGB színterű kép esetén a mélység értéke 3.
 
-A konvolúciós réteg pontszorzatot számol a bemenet és a súlyok között. A bemenet a kiindulási képnek egy csökkentett méretű része. Ezután az alrétegek jellemtérképeinek a mintavételezése következik, ami csökkenti a hálózati paramétereket, így a tanulási folyamat felgyorsul. Ezután az összes jellemtérképre alkalmazzák a pooling függvényt, végül az FC rétegek megkapják ezeket a közepes és alacsony szintű jellemzőket, és ezekből magas szintű absztrakciókat hoznak létre. Az osztályozási pontszámokat a befejező réteg segítségével állítják elő, ahol minden pontszám egy adott osztály valószínűségét jelzi. \cite{cnn}
+A konvolúciós réteg pontszorzatot számol a bemenet és a súlyok között. A bemenet a kiindulási képnek egy csökkentett méretű része. Ezután az alrétegek jellegtérképeinek a mintavételezése következik, ami csökkenti a hálózati paramétereket, így a tanulási folyamat felgyorsul. Ezután az összes jellegtérképre alkalmazzák a pooling függvényt, végül az FC rétegek megkapják ezeket a közepes és alacsony szintű jellemzőket, és ezekből magas szintű absztrakciókat hoznak létre. Az osztályozási pontszámokat a befejező réteg segítségével állítják elő, ahol minden pontszám egy adott osztály valószínűségét jelzi \cite{cnn}.
 
 \SubSection{Modell konfigurálása}
 
-A CNN modellemet a \texttt{tensorflow.keras} könyvtár segítségével hoztam létre. A tanításához 11 csendéletet kerestem az \cite{unsplash}. hivatkozásban található oldalon. Az eddig Jupyter munkafüzetben folytatott vizsgálatot a \texttt{program} nevű mappába elkezdtem egy közös programmá implementálni, a CNN modellem is már saját .py fájlban készült. Ebben a \texttt{program} mappában található egy \texttt{images} mappa, ami a tanításhoz használt képeket tartalmazza. A képek nevei a [0, 10] intervallumban található számok.
+A CNN modellemet a \texttt{tensorflow.keras} könyvtár segítségével hoztam létre. A tanításához 11 csendéletet kerestem az \cite{unsplash} hivatkozásban található oldalon. Az eddig Jupyter munkafüzetben folytatott vizsgálatot a \texttt{program} nevű mappába elkezdtem egy közös programmá implementálni, a CNN modellem is már saját Python fájlban készült. Ebben a \texttt{program} mappában található egy \texttt{images} mappa, ami a tanításhoz használt képeket tartalmazza. A képek nevei a $[0, 10]$ intervallumban található számok.
 
-A modell tanításához létre kellett hoznom a tanító halmazomat. Mivel a textúra alapú K-means algoritmus során ablakokat vágok ki a képről, így kézenfekvő volt, hogy a modellemet is hasonló ablakokkal tanítsam be. Ezért a tanítóhalmaz megalkotásához először kinyerek adott darabszámú ablakot minden egyes képről. Ezeknek az ablakoknak meghatározom a középpontjához tartozó színét, majd átalakítom HSV színterűvé a kapott RGB színt. A HSV szín alapján hozzárendelek egy címkét az adott ablakhoz. A színek felosztását, és a hozzájuk tartozó címkéket az \ref{tab:color_category}. táblázat tartalmazza.
+A modell tanításához létre kellett hoznom a tanító halmazomat. Mivel a textúra alapú K-means algoritmus során ablakokat vágok ki a képről, így kézenfekvő volt, hogy a modellemet is hasonló ablakokkal tanítsam be. Ezért a tanítóhalmaz megalkotásához először kinyerek adott darabszámú ablakot minden egyes képről. Ezeknek az ablakoknak meghatározom a középpontjához tartozó színét, majd átalakítom HSV színterűvé a kapott RGB színt. A HSV szín alapján hozzárendelek egy címkét az adott ablakhoz. A színek felosztását, és a hozzájuk tartozó címkéket \aref{tab:color_category}. táblázat tartalmazza.
 
 \begin{table}[h]
 \centering
 \caption{Színek kategorizálása HSV értékek alapján.}
 \label{tab:color_category}
 \medskip
-\begin{tabular}{|c|l|l|l|}
+\begin{tabular}{|c|c|l|l|}
 \hline
 Címke & Logikai vizsgálat & Szín & RGB kód \\
 \hline
 0 & $H < 20$ & Vörös & $[255, 0, 0]$ \\
 \hline
-1 & $H >=20 \, \& \, H < 60$ & Narancssárga & $[255, 165, 0]$ \\
+1 & $20 \leq H < 60$ & Narancssárga & $[255, 165, 0]$ \\
 \hline
-2 & $H >=60 \, \& \, H < 90$ & Sárga & $[255, 255, 0]$ \\
+2 & $60 \leq H < 90$ & Sárga & $[255, 255, 0]$ \\
 \hline
-3 & $H >=90 \, \& \, H < 120$ & Lime & $[0, 255, 0]$ \\
+3 & $90 \leq H < 120$ & Lime & $[0, 255, 0]$ \\
 \hline
-4 & $H >=120 \, \& \, H < 150$ & Zöld & $[0, 128, 0]$ \\
+4 & $120 \leq H < 150$ & Zöld & $[0, 128, 0]$ \\
 \hline
-5 & $H >=150 \, \& \, H < 180$ & Akvamarin & $[0, 255, 180]$ \\
+5 & $150 \leq H < 180$ & Akvamarin & $[0, 255, 180]$ \\
 \hline
-6 & $H >=180 \, \& \, H < 210$ & Cián & $[0, 255, 255]$ \\
+6 & $180 \leq H < 210$ & Cián & $[0, 255, 255]$ \\
 \hline
-7 & $H >=210 \, \& \, H < 240$ & Világoskék & $[0, 100, 255]$ \\
+7 & $210 \leq H < 240$ & Világoskék & $[0, 100, 255]$ \\
 \hline
-8 & $H >=240 \, \& \, H < 270$ & Kék & $[0, 0, 255]$ \\
+8 & $240 \leq H < 270$ & Kék & $[0, 0, 255]$ \\
 \hline
-9 & $H >=270 \, \& \, H < 300$ & Lila & $[128, 0, 128]$ \\
+9 & $270 \leq H < 300$ & Lila & $[128, 0, 128]$ \\
 \hline
 10 & $H > 300$ & Magenta & $[255, 0, 255]$ \\
 \hline
 11 & $V < 0.1$ & Fekete & $[0, 0, 0]$ \\
 \hline
-12 & $V > 0.9 \, \& \, S < 0.1$ & Fehér & $[255, 255, 255]$\\
+12 & $V > 0.9, S < 0.1$ & Fehér & $[255, 255, 255]$\\
 \hline
 \end{tabular}
 
@@ -242,16 +242,17 @@ def get_model():
     x_train, x_test, y_train, y_test = get_training_data()
 
     #normalizing the pixel values
-    x_train=x_train/255
-    x_test=x_test/255
+    x_train = x_train / 255
+    x_test = x_test / 255
 
-    model=Sequential()
+    model = Sequential()
 
-    model.add(Conv2D(64,(3,3),activation='relu',input_shape=(15, 15, 1)))
-    model.add(MaxPool2D(2,2))
+    model.add(Conv2D(64, (3, 3), activation='relu', \
+    	input_shape=(15, 15, 1)))
+    model.add(MaxPool2D(2, 2))
 
-    model.add(Conv2D(32,(3,3),activation='relu'))
-    model.add(MaxPool2D(2,2))
+    model.add(Conv2D(32, (3, 3), activation='relu'))
+    model.add(MaxPool2D(2 ,2))
 
     model.add(Flatten())
     model.add(Dense(32, activation='relu'))
@@ -288,7 +289,7 @@ A modell építése és ellenőrzése után már csak a tanítás és a tesztel�
 
 \SubSection{Tesztelés}
 
-A modell hatékonyságát ábrázoló grafikon az \ref{fig:cnn_accuracy}.ábrán látható.
+A modell hatékonyságát ábrázoló grafikon \aref{fig:cnn_accuracy}.ábrán látható.
 
 \begin{figure}[h]
 \centering
@@ -297,12 +298,12 @@ A modell hatékonyságát ábrázoló grafikon az \ref{fig:cnn_accuracy}.ábrán
 \label{fig:cnn_accuracy}
 \end{figure}
 
-A modell pontosságát maximum 72\%-ra tudtam megnöveli, és sajnos így sem produkál olyan működést, mint amilyet vártam tőle. A modellt próbáltam javítani a képek módosításával, a tanító halmaz növelésével, csökkentésével, az adatok szűrésével, a modell rétegeinek módosításával, de a fentebb látható konfigurációnál nem sikerült jobbat létrehoznom. Az eddigi vizsgálatokat, és a CNN futási eredményeit az \ref{fig:result_all_kmeans}. ábra tartalmazza K-means módszerrel szegmentált képekre, és az \ref{fig:result_all_superpixel}. ábra tartalmazza szuperpixel metódusok segítségével szegmentált képekre.
+A modell pontosságát maximum 72\%-ra tudtam megnöveli, és sajnos így sem produkál olyan működést, mint amilyet vártam tőle. A modellt próbáltam javítani a képek módosításával, a tanító halmaz növelésével, csökkentésével, az adatok szűrésével, a modell rétegeinek módosításával, de a fentebb látható konfigurációnál nem sikerült jobbat létrehoznom. Az eddigi vizsgálatokat, és a CNN futási eredményeit \aref{fig:result_all_kmeans}. ábra tartalmazza K-means módszerrel szegmentált képekre, és \aref{fig:result_all_superpixel}. ábra tartalmazza szuperpixel metódusok segítségével szegmentált képekre.
 
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.5]{images/result_all_kmeans.png}
-\caption{A vizsgálatok futtatása CNN színezéssel az összes K-means módszerrel klaszterezett teszt képre. Az oszlopok a következő képeket tartalmazzák: (a) eredeti, színes kép (b) eredeti, szürkeárnyalatos kép (c) textúra alapú k-means szegmentált kép (d) random színekkel színezett kép HSV színtérben (e) CNN használatával színezett kép HSV színtérben }
+\caption{A vizsgálatok futtatása CNN színezéssel az összes K-means módszerrel klaszterezett teszt képre. Az oszlopok a következő képeket tartalmazzák: (a) eredeti, színes kép (b) eredeti, szürkeárnyalatos kép (c) textúra alapú k-means szegmentált kép (d) véletlenszerű színekkel színezett kép HSV színtérben (e) CNN használatával színezett kép HSV színtérben }
 \label{fig:result_all_kmeans}
 \end{figure}
 
@@ -317,9 +318,9 @@ K-means esetén adott klaszterhez a szín meghatározása többségi döntés al
 
 Az \ref{fig:result_all_kmeans}. ábrán megfigyelhető, hogy bár például a 2. képen a körtén belül több szegmenst határozott meg a K-means, a CNN mindegyik szegmensnek ugyanazt a színt jósolta, így a körte egy színű lett. Viszont az is látható, hogy ugyan ezt nem tudta megvalósítani az 1. képen.
 
-A szuperpixel módszerek esetén minden szuperpixelre 20 ablakot viszgálok, az ablakok kezdőpontját random határozom meg. A szín döntése csak úgy, mint a K-means esetén, többségi döntés alapján születik. 
+A szuperpixel módszerek esetén minden szuperpixelre 20 ablakot viszgálok, az ablakok kezdőpontját véletlenszerűen határozom meg. A szín döntése csak úgy, mint a K-means esetén, többségi döntés alapján születik. 
 
-Az \ref{fig:result_all_superpixel}. ábrán szembetűnő, hogy csak a különböző szuperpixeleket vizsgálva gyakori, hogy az azonos objektumokon belül más-más színeket jósol. Ezt lehetne javítani több mintavétellel az adott szuperpixeleken belül, viszont az a futási időt megnövelné. Az is jól látszik, hogy a SLIC módszer jobb színezést eredményez, mint a Watershed módszer. Az összes módszer közül egyedül a SLIC volt az, ami a színezésnél el tudta különíteni a 6. képen az avokádót a többi objektumtól, és más színre színezte.
+\Aref{fig:result_all_superpixel}. ábrán szembetűnő, hogy csak a különböző szuperpixeleket vizsgálva gyakori, hogy az azonos objektumokon belül más-más színeket jósol. Ezt lehetne javítani több mintavétellel az adott szuperpixeleken belül, viszont az a futási időt megnövelné. Az is jól látszik, hogy a SLIC módszer jobb színezést eredményez, mint a Watershed módszer. Az összes módszer közül egyedül a SLIC volt az, ami a színezésnél el tudta különíteni a 6. képen az avokádót a többi objektumtól, és más színre színezte.
 
 Ami szembetűnő, hogy a modell sok esetben sárga és fehér színeket jósol az adott ablakokra. Ez abból eredhet, hogy a tanító halmazban több sárga szín található, mint zöld vagy kék, viszont a sárga szín csökkentésével sem értem el jobb eredményt, abban az esetben egy másik színt használt ugyan olyan gyakorisággal. A legtöbbször előforduló szín a minták során a fekete, a színek meghatározásánál viszont a modell nagyon ritkán jósolt fekete színt egy adott klaszterhez. 
 

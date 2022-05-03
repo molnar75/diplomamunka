@@ -1,12 +1,12 @@
-\Chapter{Általános információk (?)}
+\Chapter{Eszközkészlet bemutatása}
 
-Ebben a fejezetben néhány általános információ található, amik a dolgozat teljes egészére érvényesek.
+Ebben a fejezetben olyan általános információk található, amelyek a dolgozat teljes egészére érvényesek. Bemutatásra kerül, hogy milyen képekre vonatkozik az elemzés, milyen a vizsgálatokhoz rendelkezésre álló szoftveres és hardveres környezet.
 
 \Section{Felhasznált képek}
 
-A teszteléshez csendéletekről készült képeket gyűjtöttem az unsplash nevezetű weboldalról. \cite{unsplash}
+A teszteléshez csendéletekről készült képeket gyűjtöttem az \textit{Unsplash} nevű weboldalról \cite{unsplash}.
 A csendéleteken a tárgyak intenzitása jól elkülönül a háttér intenzitásától így egyszerűbben lehet rajta szegmentálást végrehajtani.
-A képek a \ref{fig:images}. ábrán láthatóak, a neveik a 0 és 5 közötti számok, pl. 0.jpg.
+A képek \aref{fig:images}. ábrán láthatóak, a neveik a 0 és 5 közötti számok, például \texttt{0.jpg}.
 
 \begin{figure}[htb]
     \centering % <-- added
@@ -49,21 +49,19 @@ A képek a \ref{fig:images}. ábrán láthatóak, a neveik a 0 és 5 közötti s
 \Section{Képek feldolgozása}
 
 A képek feldolgozása során előfordulnak olyan lépések, műveletek, amelyeket több ponton is megismételtem. Ezeket ebben a bekezdésben szeretném bemutatni, a későbbiekben nem térek ki rájuk részletesen.
-A képfeldolgozáshoz az \texttt{opencv-python} könyvtárat használtam.
+A képfeldolgozáshoz az OpenCV függvénykönyvtárat használtam a Python \texttt{opencv-python} csomagja formájában.
 
 \SubSection{Betöltés}
 
 A képeket két módon töltöm be a további feldolgozásra:
 \begin{itemize}
-\item színesen
-\item szürkeárnyalatosan
+\item színesen,
+\item szürkeárnyalatosan.
 \end{itemize}
-Ehhez két külön metódust készítettem:
-\begin{itemize}
-\item \texttt{load\_image\_rgb}
-\item \texttt{load\_image\_grayscale}
-\end{itemize}
-Ezek eleinte minden munkafüzetben ismétlődtek, majd a kutatás későbbi szakaszában kiszerveztem őket a \texttt{commonmethods} nevű saját készítésű python librarybe amiről részletesebben a következő alfejezetben írok.
+Ehhez két külön metódust készítettem \texttt{load\_image\_rgb} és \texttt{load\_image\_grayscale} néven.
+
+A fejlesztés során Jupyter munkafüzetekbe írtam a kódokat.
+Ezek eleinte minden munkafüzetben ismétlődtek, majd a kutatás későbbi szakaszában kiszerveztem őket a \texttt{commonmethods} nevű saját készítésű Python függvénykönyvtárba, amelyről részletesebben a következő alfejezetben írok.
 
 A szürkeárnyalatos kép betöltését a következő kódrészlet tartalmazza.
 \begin{python}
@@ -76,14 +74,14 @@ def load_image_grayscale(name):
         the method doesn't need the path or the extension
     :return: the loaded image in grayscale color
     """
-    image = cv2.imread('../images/' + format(name) + '.jpg')
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    return image
+    image = cv2.imread(f'../images/{name}.jpg')
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return gray_image
 \end{python}
-A színes kép betöltése annyiban különbözik, hogy a cv2.COLOR\_BGR2GRAY helyett cv2.COLOR\_BGR2RGB szerepel.
+A színes kép betöltése annyiban különbözik, hogy a \texttt{cv2.COLOR\_BGR2GRAY} helyett \texttt{cv2.COLOR\_BGR2RGB} szerepel.
 
 Mind a két metódus a kép nevét várja bemenetként. Mivel a tesztelés során használt képek mindegyike JPG típusú, így a kiterjesztést a metódus automatikusan hozzákapcsolja.
+(A JPG választása indokoltnak tűnt, mivel a fényképek többségében ilyen formátumban kerülnek mentésre.)
 
 \SubSection{Átméretezés}
 
@@ -91,7 +89,7 @@ Mind a két metódus a kép nevét várja bemenetként. Mivel a tesztelés sorá
 \begin{python}
 import cv2
 
-def resize_image(image, desired_height) :
+def resize_image(image, desired_height):
     """
     Resizing the image for the given height,
     without disortion, using opencv-python
@@ -107,17 +105,17 @@ def resize_image(image, desired_height) :
     dim = (width, desired_height)
 
     resized_image = \
-        cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+        cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
 
     return resized_image
 \end{python}
-Bemenetként magát a képet várja és azt a méretet px-ben, amire a magasságot szeretnénk változtatni. Hogy ne torzuljon a kép, kiszámítok egy arányt a paraméterként kapott méretből és a kép magasságából, majd ezzel az aránnyal csökkentem a kép szélességét.
+Bemenetként magát a képet várja és azt a méretet pixelben, amire a magasságot szeretnénk változtatni. Hogy ne torzuljon a kép, kiszámítok egy arányt a paraméterként kapott méretből és a kép magasságából, majd ezzel az aránnyal csökkentem a kép szélességét.
 
 \Section{Közös metódusok kiszervezése}
 
-Mint már az előző alfejezetekben említettem, több olyan metódus is előfordult, amit több python-notebook esetén is alkalmaztam. Eleinte csak átmásoltam egyik munkafüzetből a másikba a kódot, de ahogy egyre többször ismétlődött ugyanaz a kódrész úgy döntöttem, hogy ideje kiszervezni őket.
+Mint már az előző alfejezetekben említettem, több olyan metódus is előfordult, amit több Jupyter munkafüzet esetén is alkalmaztam. Eleinte csak átmásoltam egyik munkafüzetből a másikba a kódot, de ahogy egyre többször ismétlődött ugyanaz a kódrész úgy döntöttem, hogy ideje kiszervezni őket.
 
-Úgy nevezett Python Package-t, Python csomagot készítettem belőlük méghozzá azért, mert egyszerűen használható. A generálása után a \texttt{pip} parancs segítségével futtatható és ha szeretnénk, tudjuk ezeket publikálni is. \cite{pythonlibrary}
+Úgy nevezett Python Package-t, Python csomagot készítettem belőlük méghozzá azért, mert egyszerűen használható. A generálása után a \texttt{pip} parancs segítségével telepíthetőek, és ha szeretnénk, tudjuk ezeket publikálni is \cite{pythonlibrary}.
 
 Ahhoz, hogy létre tudjunk hozni egy ilyen csomagot, szükséges hogy a \texttt{pip} legfrissebb verziója legyen feltelepítve, ezen kívül szükségesek a \texttt{wheel} és a \texttt{setuptools} nevezetű könyvtárak.
 
@@ -152,24 +150,21 @@ Amint felépítettük a struktúránkat és elkészítettük a megfelelő fájlo
 \begin{python}
 python setup.py bdist_wheel
 \end{python}
-
 Ez generál nekünk egy \texttt{dist} nevű mappát amiben benne lesz egy \texttt{.whl} kiterjesztésű fájl. Ezt a fájlt kell futtassuk a következő módon:
-
 \begin{python}
 pip install /path/wheelfile.whl
 \end{python}
-
-A futtatás után már használható is a könyvtárunk, én a következő módon hivatkozok rá a notebookokban:
+A futtatás után már használható is a könyvtárunk, én a következő módon hivatkozok rá a munkafüzetekben:
 \begin{python}
 import commonmethods.image_modification as im
 import commonmethods.optimal_cluster_number as ocn
 \end{python}
 
-A fájlok listázása során említettem, hogy a \texttt{setup.py} a legfontosabb mivel ennek alapján készül el a könyvtárunk, így ennek a tartalmát a következő alfejezetben szeretném részletesen bemutatni.
+A fájlok listázása során említettem, hogy a \texttt{setup.py} a legfontosabb, mivel ennek alapján készül el a könyvtárunk, így ennek a tartalmát a következő alfejezetben szeretném részletesen bemutatni.
 
 \SubSection{setup.py}
 
-A \texttt{setup.py} fájl a scriptünk, amit a \texttt{setuptools} fog használni hogy elkészítse a könyvtárat. Ebben található meg minden főbb információ a csomagunkról. A következő kódrészlet az én \texttt{setup.py} fájlom ami egy minimális készletet használ, ennél sokkal több argumentumot ismer a \texttt{setup()}. A teljes argumentum lista megtalálható a \cite{setup} oldalon.
+A \texttt{setup.py} fájl a szkriptünk, amit a \texttt{setuptools} fog használni, hogy elkészítse a könyvtárat. Ebben található meg minden főbb információ a csomagunkról. A következő kódrészlet az én \texttt{setup.py} fájlom, ami egy minimális készletet használ. Ennél sokkal több argumentumot ismer a \texttt{setup()}. A teljes argumentum lista megtalálható a \cite{setup} oldalon.
 \begin{python}
 from setuptools import setup, find_packages
 
@@ -192,11 +187,11 @@ setup(
 \end{python}
 Az argumentumokról részletesebben:
 \begin{itemize}
-\item \texttt{name}: Ezen a néven tudjuk majd hivatkozni a könyvtárunkat. Csak betűket, számokat, \_, és - karaktereket tartalmazhat. Amennyiben szeretnénk publikálni a csomagunkat, akkor egyedinek kell lennie a pypi.org oldalon.
+\item \texttt{name}: Ezen a néven tudjuk majd hivatkozni a könyvtárunkat. Csak betűket, számokat, \texttt{\_}, és \texttt{-} karaktereket tartalmazhat. Amennyiben szeretnénk publikálni a csomagunkat, akkor egyedinek kell lennie a pypi.org oldalon.
 \item \texttt{version}: A csomagunk verziója.
 \item \texttt{author} és \texttt{author\_email}: A készítő adatai.
 \item \texttt{description}: Rövid, egy mondatos leírás, ami összefoglalja a csomag tartalmát.
-\item \texttt{long\_description}: Részletes leírása a csomagnak, gyakran használják úgy hogy a \texttt{README.md} fájlból töltik be.
+\item \texttt{long\_description}: Részletes leírása a csomagnak, gyakran használják úgy, hogy a \texttt{README.md} fájlból töltik be.
 \item \texttt{packages}: Itt tudjuk megadni, hogy mely csomagokat szeretnénk hozzáadni a könyvtárunkhoz. Egyszerűen használhatjuk a \texttt{find\_packages()} metódust ami automatikusan megtalálja a csomagokat. Az én esetemben az egyedüli csomag a \texttt{commonmethods}.
 \item \texttt{install\_requires}: Itt tudjuk megadni, hogy a csomagunk használatához milyen könyvtárak szükségesek. Amennyiben valamelyik csomag hiányzik, azt a telepítés elején automatikusan feltelepíti, ezért itt minden esetben csak az elengedhetetlen könyvtárakat adjuk meg.
 \end{itemize}
@@ -205,8 +200,8 @@ Az argumentumokról részletesebben:
 
 A programkódok tesztelését minden esetben az otthoni számítógépemen végeztem, aminek a paraméterei a következők:
 \begin{itemize}
-\item Processzor: Intel(R) Core(TM) i5-9400F CPU 2.90GHz
-\item Memória mérete: 16 GB
-\item Videókártya: NVIDIA GeForce GTX 1660
-\item Operációs rendszer: Windows 10 Enterprise
+\item Processzor: Intel(R) Core(TM) i5-9400F CPU 2.90GHz,
+\item Memória mérete: 16 GB,
+\item Videókártya: NVIDIA GeForce GTX 1660,
+\item Operációs rendszer: Windows 10 Enterprise.
 \end{itemize} 
