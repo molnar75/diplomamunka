@@ -1,0 +1,61 @@
+------ 2. dia ------
+Egyik nap amikor a nagyszüleimnél voltam régi képeket nézegettünk, és elgondolkoztam azon, vajon hogyan lehetne elkészíteni egy programot ami szürkeárnyalatos képek kiszínezését valósítja meg.
+Így a dolgozatom során a szürkeárnyalatos képek kiszínezését vizsgáltam a Python eszközkészletének a segítségével.
+A képek kiszínezése 2 problémakörre osztható, az első problémakör hogy hogyan tudjuk szegmentálni a képet, vagyis hogy hogyan tudjuk meghatározni az összetartozó, azonos színű részeket. A második problémakör pedig maga a színezés. 
+------ 3. dia ------
+A szakirodalom vizsgálata során azt tapasztaltam, hogy az egyik legelterjedtem módszer a szegmentálás során a K-means klaszterezési módszer. 
+A klaszterezés célja, hogy egy adathalmazt diszjunkt részhalmazokra (klaszterekre) ossza fel méghozzá úgy, hogy a klaszterezési kritérium optimális legyen. A legelterjedtebb klaszterezési kritérium az egyes adatpontok, és az azokat tartalmazó klaszter
+középpontja közötti négyzetes Euklidészi távolságok összege.
+A K-means módszer gyors, könnyen megvalósítható. K darab klaszterre osztja az adathalmazunkat, a k értékét mi adjuk meg. 
+Első lépésként random felveszi a klaszterközéppontokat, majd minden ponthoz hozzárendeli a hozzá legközelebb eső klaszterközéppontot. 
+Ezután a kialakult klaszterek tényleges középpontjába mozgatja a középpontokat. Ezután a ismét meghatározza a pontokhoz a klaszterközéppontot. 
+Ezután a lépéseket addig folytatja, amíg a középpontok helyben nem maradnak. 
+A módszer egyik kritikus pontja a k értéke, ezért megvizsgáltam 4 módszert, amelyek segítségével meghatározhatjuk az optimális klaszterszámot. 
+------ 4. dia ------
+A 4 módszer a Silhouette módszer, a Davies-bouldin módszer, a Calinski-Harabasz módszer és az Elbow módszer. 
+Az első 3 módszer mindegyike meghatároz egy index értéket egy adott klaszterezésre. Az index értékeket különböző k értékekre összehasonlítva meg tudjuk határozni, melyik klaszterszám volt az optimálisabb.
+Az elbow módszer inkább egy vizuális módszer, ez a variancia százalékos arányát vizsgálja a különböző klaszterszámokra. Azon az elven alapszik, hogy olyan klaszterszámot kell választanunk, amelyhez ha hozzáadnánk akár csak egy klasztert is, akkor a
+modellünk már nem javulna számottevő mértékben. Az ábrán egy mintha látható az elbow módszerre. Ebben az esetben a töréspont a 2 és 3 klaszterek esetén történik meg, tehát innentől kezdve már nem nő túlságosan az információ mennyiség, így ezek közül érdemes klaszterszámot választani.
+------ 5. dia ------
+A K-means módszert 2 elképzelés alapján használtam. 
+Először intenzitás alapján próbáltam alkalmazni a K-means módszert, tehát a kép pixeleit egyszerűen átadtam az algoritmusnak. 
+Ebben az esetben azt tapasztaltam, hogy az árnyékokat nem tudja elválasztani a módszer az objektumoktól, és optimális klaszterszámra is kettőt kaptam, pedig színekből több szerepel a képen.
+A színezéshez ez a klaszterezés így nem lesz megfelelő.
+------ 6. dia ------
+Ezután megpróbáltam textúra alapján elkülöníteni a képek különböző részeit. 
+Ezt úgy tettem meg, hogy a szürkeárnyalatos képből 15x15 pixel méretű ablakokat vágtam ki, majd ezeket egy feature vektorba foglaltam, és úgy adtam át a K-means módszernek klaszterezésre.
+A baloldali ábrán minta ablakok láthatók az adott képből. 
+Egy futási eredményt a generált ablakok klaszterezésére a jobb oldali ábra tartalmazza. 
+Miután megkaptam az ablakokat, a képnek a többi pontját is be kellett valahogy osztanom a meglévő klaszterekbe. 
+------ 7. dia ------
+Ehhez a KNN osztályozót használtam. Az osztályozó az adott pont k darab szomszédjának a klaszterét vizsgálja, és amelyik klaszterből a legtöbb van, az lesz a vizsgált pont klasztere. 
+Ezt elvégeztem úgy, hogy ablakokra osztottam a képet és úgy is, hogy az összes pixelre elvégeztem újra az osztályozást. Emiatt a pixelenkénti osztályozás miatt lett a programom lassú.
+Mint látható, a pixel alapú módszerem se ért el jobb eredményt, mint a sima, intenzitás alapú módszer. Próbálkoztam a feature vektor módosításával, egyszerűsítésével, bővítésével, normalizálásával de sajnos nem értem el jobb eredményt. 
+Ezért új módszer után kezdtem kutatni. 
+------ 8. dia ------
+Az újonnan talált módszer neve a szuperpixel módszer. A szuperpixel módszer során a pixelekből nagyobb csoportokat, úgynevezett szuperpixeleket képez az algoritmus. 4 módszert találtam a scikit-learn rendszerében amiket egyesével leteszteltem, ennek az eredménye a képen látható. 
+Jól látható, hogy a SLIC és a Watershed módszerek szolgáltatták a legjobb eredményt. Ezen algoritmusok esetében szépen elkülönülnek egymástól az objektumok, és kevésbé befolyásolja az eredményt a tárgyakon megtalálható árnyék nem úgy, mint a K-means esetében.
+Ezt a kép szuperpixel módszer alkalmaztam a végső programomban. 
+------ 9. dia ------
+Miután befejeztem a szegmentálás vizsgálatát, jöhetett a képek kiszínezése. Első lépésben általam meghatározott színekből, random választotta ki az algoritmus, hogy az adott szegmensek milyen színeket kapjanak. 
+A visszaszínezés lényege az volt, hogy úgy színezzük vissza a képeket, hogy a szürkeárnyalatos kép árnyalatai megjelenjenek. A problémát megvizsgáltam mind RGB, mind HSV színterekben is. 
+A vizsgálat során arra jutottam, hogy a HSV színtérben egyszerűbb a színek megjelenítése, mivel csak a Hue értékét kell választani, a Value értéke az lehet egy becsült érték, míg a Saturation az megegyezik a szürkeárnyalatos kép S értékével. 
+------ 10. dia ------
+A véletlen választott színek helyett az egyik legelterjedtebb neurális hálót, a Konvolúciós Neurális Hálót használtam fel a színek becslésére. Megadtam 13 szín kategóriát, amelynek a táblázata a dolgozatban megtalálható. 
+A fő kategóriák a HSV színtér fő kategóriájából származnak, ahhoz a 6 kategóriához készítettem még tapasztalati érték alapján 7 alkategóriát. Például a sárga mellé került egy narancssárga, a kék mellé egy világoskék.
+A CNN modellem ezek közül választaja ki az adott színt. 
+A modellt hasonló csendéletek segítségével tanítottam be. Igyekeztem olyanokat keresni, amelyeken megjelennek hasonló tárgyak.
+A modell az ablakok klaszterezése után használom. Minden ablakra készítek egy becslést, majd többségi döntés alapján választom ki az adott klaszterhez tartozó színt. 
+A modell pontossága látható az ábrán, a kb 70%-os pontosságnál sajnos jobbat nem sikerült vele elérnem, és így sem teljesíti az általam elvártakat. A következő 2 dián a különböző futási eredmények összefoglalása látható.
+------ 11. dia ------ 
+Itt a K-means szegmentálás alapú eredmény látható. A különböző klaszterszámokat én határoztam meg. Balról jobbra haladva látható az eredeti kép, a szürkeárnyalatos változata, a klaszterekre osztott kép, itt a klasztereket 1-1 random színnel jelöltem. Ezután az árnyalatokat is megjelenítettem a képen, végül pedig a kép a CNN által becsült színekkel kiszínezve látható.
+Minden képet a HSV színtérben színeztem. 
+Ami szembetűnő, hogy a narancssárga színt előszeretettel jósolja a modell. 
+Vannak olyan részek, ahol viszonylag pontosan tudott színt jósolni, például az első képen a falat, vagy hogy a körte nagy része sárga. A harmadik mintaképen a kis vázát is közel azonosra színezte. Több objektumnál is előfordult hogy attól függetlenül, hogy külön klaszterbe tartoztak a részek, ugyanolyan színt kaptak.
+------ 12. dia ------ 
+Ezen a dián a Szuperpixel szegmentálás alapú eredmény látható. Balról-jobbra szintén az eredeti kép, a szürkeárnyalatos, majd a SLIC módszer, végül a watershed módszer.
+Ebben az esetben a modell gyengesége szembetűnő. Látszik, hogy például a második képen a körtén belül különböző színeket jósol. Itt kevésbé egységesek a színek, de ezen lehetne javítani újabb vizsgálatok segítségével.
+------ 13. dia ------ 
+Összegezve azt tudnám elmondani, hogy a színek visszabecslése szürkeárnyalatos képekből nem egy egyszerű feladat abban az esetben, ha nincsen semmilyen információnk a kép eredeti színéről. 
+Amennyiben lenne egy színtérképünk, akkor az alapján az objektumokat egyszerűen ki tudnánk színezni. Ezen kívül a szegmentálásra a K-means módszer szürkeárnyalatos képek esetén nem a legmegfelelőbb, sokkal egyszerűbben használhatók a Szuperpixel módszerek, és jobb eredményt is produkálnak. 
+A visszaszínezés során a HSV színtérben egyszerűbb volt a színezést megvalósítani, mint az RGB színtérben és sokkal szebb eredményt is adott. 
