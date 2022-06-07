@@ -6,10 +6,7 @@ A képek kiszínezése 2 problémakörre osztható, az első problémakör hogy 
 A szakirodalom vizsgálata során azt tapasztaltam, hogy az egyik legelterjedtem módszer a szegmentálás során a K-means klaszterezési módszer. 
 A klaszterezés célja, hogy egy adathalmazt diszjunkt részhalmazokra (klaszterekre) ossza fel méghozzá úgy, hogy a klaszterezési kritérium optimális legyen. A legelterjedtebb klaszterezési kritérium az egyes adatpontok, és az azokat tartalmazó klaszter
 középpontja közötti négyzetes Euklidészi távolságok összege.
-A K-means módszer gyors, könnyen megvalósítható. K darab klaszterre osztja az adathalmazunkat, a k értékét mi adjuk meg. 
-Első lépésként random felveszi a klaszterközéppontokat, majd minden ponthoz hozzárendeli a hozzá legközelebb eső klaszterközéppontot. 
-Ezután a kialakult klaszterek tényleges középpontjába mozgatja a középpontokat. Ezután a ismét meghatározza a pontokhoz a klaszterközéppontot. 
-Ezután a lépéseket addig folytatja, amíg a középpontok helyben nem maradnak. 
+A K-means módszer gyors, könnyen megvalósítható. K darab klaszterre osztja az adathalmazunkat, a k értékét mi adjuk meg.
 A módszer egyik kritikus pontja a k értéke, ezért megvizsgáltam 4 módszert, amelyek segítségével meghatározhatjuk az optimális klaszterszámot. 
 ------ 4. dia ------
 A 4 módszer a Silhouette módszer, a Davies-bouldin módszer, a Calinski-Harabasz módszer és az Elbow módszer. 
@@ -39,7 +36,7 @@ Ezt a kép szuperpixel módszer alkalmaztam a végső programomban.
 ------ 9. dia ------
 Miután befejeztem a szegmentálás vizsgálatát, jöhetett a képek kiszínezése. Első lépésben általam meghatározott színekből, random választotta ki az algoritmus, hogy az adott szegmensek milyen színeket kapjanak. 
 A visszaszínezés lényege az volt, hogy úgy színezzük vissza a képeket, hogy a szürkeárnyalatos kép árnyalatai megjelenjenek. A problémát megvizsgáltam mind RGB, mind HSV színterekben is. 
-A vizsgálat során arra jutottam, hogy a HSV színtérben egyszerűbb a színek megjelenítése, mivel csak a Hue értékét kell választani, a Value értéke az lehet egy becsült érték, míg a Saturation az megegyezik a szürkeárnyalatos kép S értékével. 
+A vizsgálat során arra jutottam, hogy a HSV színtérben egyszerűbb a színek megjelenítése, mivel csak a Hue értékét kell választani, a Saturation értéke az lehet egy becsült érték, míg a Value az megegyezik a szürkeárnyalatos kép V értékével. 
 ------ 10. dia ------
 A véletlen választott színek helyett az egyik legelterjedtebb neurális hálót, a Konvolúciós Neurális Hálót használtam fel a színek becslésére. Megadtam 13 szín kategóriát, amelynek a táblázata a dolgozatban megtalálható. 
 A fő kategóriák a HSV színtér fő kategóriájából származnak, ahhoz a 6 kategóriához készítettem még tapasztalati érték alapján 7 alkategóriát. Például a sárga mellé került egy narancssárga, a kék mellé egy világoskék.

@@ -139,7 +139,7 @@ A K-means módszer:
 \frametitle{K-means klaszterezés textúra alapján}
 \begin{figure}[!tbp]
   \centering
-  \begin{minipage}[b]{0.5\textwidth}
+  \begin{minipage}[b]{0.55\textwidth}
     \includegraphics[width=\textwidth]{images/window_example.png}
   \end{minipage}
   \hfill
@@ -166,7 +166,7 @@ A K-means módszer:
 
 \begin{figure}[!tbp]
   \centering
-  \begin{minipage}[b]{0.7\textwidth}
+  \begin{minipage}[b]{0.65\textwidth}
     \includegraphics[width=\textwidth]{images/superpixel_example.png}
   \end{minipage}
 \end{figure}
@@ -179,10 +179,11 @@ A K-means módszer:
 A szürkeárnyalatos képek kiszínezése az árnyalatok megjelenítésével. A minél jobb eredmény elérésének érdekében az RGB és HSV színterekben is megvizsgáltam a problémát.
 \begin{figure}[!tbp]
   \centering
-  \begin{minipage}[b]{0.4\textwidth}
+  \begin{minipage}[b]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/colorized_rgb.png}
   \end{minipage}
-  \begin{minipage}[b]{0.4\textwidth}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/colorized_hsv.png}
   \end{minipage}
 \end{figure}
@@ -191,13 +192,11 @@ A szürkeárnyalatos képek kiszínezése az árnyalatok megjelenítésével. A 
 % --------------------
 \begin{frame}[fragile]
 \frametitle{Képek színének visszabecslése}
-A színek visszabecslésére CNN modellt használok. A modell általam megadott, 13 kategória (szín) közül választja ki a becsült értéket. 
-
-\bigskip
+A színek visszabecslésére CNN modellt használok. A modell általam megadott, 13 kategória (szín) közül választja ki a becsült értéket.
 
 \begin{figure}[!tbp]
   \centering
-  \begin{minipage}[b]{0.5\textwidth}
+  \begin{minipage}[b]{0.58\textwidth}
     \includegraphics[width=\textwidth]{images/cnn_accuracy.png}
   \end{minipage}
 \end{figure}
@@ -233,9 +232,26 @@ A színek visszabecslésére CNN modellt használok. A modell általam megadott,
 \begin{frame}[fragile]
 \frametitle{Összegzés}
 \begin{itemize}
-	\item A szürkeárnyalatos képekből visszanyerni a kép eredeti színeit az nem egy egyszerú feladat abban az esetben, ha nincsen a programnak kiindulási alapja
-    \item Szürkeárnyalatos képek szegmentálására nem a K-means a legmegfelelőbb módszer
-    \item Vissza színezés esetén a HSV színtér használata sokkal egyszerűbb, mint az RGB színtéré
+	\item A szürkeárnyalatos képekből visszanyerni a kép eredeti színeit az nem egy egyszerű feladat abban az esetben, ha nincsen a programnak kiindulási alapja.
+    \item Szürkeárnyalatos képek szegmentálására nem a K-means a legmegfelelőbb módszer.
+    \item Vissza színezés esetén a HSV színtér használata sokkal egyszerűbb, mint az RGB színtéré.
+\end{itemize}
+
+\end{frame}
+
+% --------------------
+\begin{frame}[fragile]
+\frametitle{Felhasznált irodalmak}
+
+\begin{itemize}
+	\item Python.org. Packaging python projects. https://packaging.python.org/en/latest/tutorials/
+    packaging-projects/
+    \item OpenCV. K-means clustering in opencv. https://docs.opencv.org/4.x/d1/d5c/
+    tutorial\_py\_kmeans\_opencv.html
+    \item Comparison of segmentation and superpixel algorithms. https://\mbox{scikit-image}.org/docs/stable/
+    \mbox{auto\_examples}/segmentation/
+    plot\_segmentations.html
+    \item Khushbu Raval, Ravi Shukla, and Ankit K Shah. Color image segmentation using fcm clustering technique in rgb, l* a* b, hsv, yiq color spaces. Eur. J. Adv. Eng. Technol, 4(3):194U200, 2017.
 \end{itemize}
 
 \end{frame}
